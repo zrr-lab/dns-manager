@@ -13,7 +13,7 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import (
 )
 from tencentcloud.dnspod.v20210323 import dnspod_client, models
 
-from auto_dns.get_ip import get_network_subnet_wan
+from auto_ddns.get_ip import get_network_subnet_wan
 
 
 def classify_record(value: str) -> tuple[str, str]:

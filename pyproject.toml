@@ -1,5 +1,5 @@
 [project]
-name = "auto-dns"
+name = "auto-ddns"
 dynamic = ["version"]
 description = "auto config dns"
 authors = [
@@ -27,7 +27,7 @@ write_template = "__version__ = '{}'"
 test = [
     "pytest",
     "pytest-mock",
-    "converage",
+    "coverage",
 ]
 
 [tool.pdm.build]
