@@ -5,7 +5,6 @@ from sys import stdout
 import typer
 from loguru import logger
 
-from auto_config import utils
 from auto_ddns import update_dnspod
 
 app = typer.Typer()

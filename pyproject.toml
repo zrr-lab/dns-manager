@@ -56,7 +56,7 @@ known-first-party = ["auto_dns"]
 required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"] # Ignore unused imports in __init__.py
+"__init__.py" = ["F401", "I002"] # Ignore unused imports in __init__.py
 
 [build-system]
 requires = ["pdm-backend"]

@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 import json
 import os
 import re
 from sys import stdout
 from typing import Sequence
 
-import invoke
 import typer
 from loguru import logger
 from tencentcloud.common import credential
@@ -13,14 +14,14 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import (
 )
 from tencentcloud.dnspod.v20210323 import dnspod_client, models
 
-from auto_ddns.get_ip import get_network_subnet_wan
+from auto_ddns.get_ip import get_interface_ip
 
 
 def classify_record(value: str) -> tuple[str, str]:
     if value.startswith("snmp:"):
         record_type = "A"
         interface_name = value.strip("snmp:")
-        value = get_network_subnet_wan(interface_name)
+        value = get_interface_ip(interface_name)
     elif ":" in value or value == "unknown":
         value = "bone6.top"
         record_type = "CNAME"
@@ -29,6 +30,7 @@ def classify_record(value: str) -> tuple[str, str]:
     else:
         record_type = "CNAME"
     return value, record_type
+
 
 class Client:
     def __init__(self, domain: str, config_path="~/.config/autoconfig") -> None:
@@ -49,9 +51,7 @@ class Client:
                 json.dump(token, f)
             logger.info(f"Secret saved to {secret_path}")
 
-        cred = credential.Credential(
-            token.get("TENCENTCLOUD_SECRET_ID"), token.get("TENCENTCLOUD_SECRET_KEY")
-        )
+        cred = credential.Credential(token.get("TENCENTCLOUD_SECRET_ID"), token.get("TENCENTCLOUD_SECRET_KEY"))
 
         self.client = dnspod_client.DnspodClient(cred, "")
         self.domain = domain
@@ -72,9 +72,7 @@ class Client:
             return []
 
     def create_record(self, sub_domain: str | list[str], value: str, record_type: str):
-        sub_domain = (
-            ".".join(sub_domain) if isinstance(sub_domain, list) else sub_domain
-        )
+        sub_domain = ".".join(sub_domain) if isinstance(sub_domain, list) else sub_domain
         try:
             req = models.CreateRecordRequest()
             params = {
@@ -92,12 +90,8 @@ class Client:
         except TencentCloudSDKException as err:
             logger.warning(err)
 
-    def modify_record(
-        self, record_id: str, sub_domain: str | list[str], value: str, record_type: str
-    ):
-        sub_domain = (
-            ".".join(sub_domain) if isinstance(sub_domain, list) else sub_domain
-        )
+    def modify_record(self, record_id: str, sub_domain: str | list[str], value: str, record_type: str):
+        sub_domain = ".".join(sub_domain) if isinstance(sub_domain, list) else sub_domain
         try:
             req = models.ModifyRecordRequest()
             params = {
@@ -141,17 +135,14 @@ class Client:
                 logger.info(f"Modify {record_type} record: {name} -> {value}")
 
 
-def update_records_from_dict(
-    config: dict, *, log_level="INFO"
-):
+def update_records_from_dict(config: dict, *, log_level="INFO"):
     logger.remove()
     logger.add(stdout, level=log_level)
     client = Client(config["domain"])
     client.update_records(config["records"])
 
-def update_records_from_json(
-    path: str = "~/.config/autoconfig/dns.json", *, log_level="INFO"
-):
+
+def update_records_from_json(path: str = "~/.config/autoconfig/dns.json", *, log_level="INFO"):
     logger.remove()
     logger.add(stdout, level=log_level)
     path = os.path.expanduser(path)
@@ -174,7 +165,7 @@ def update_records_from_json(
 # IPV4_REG = r'((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])'
 # # IPV6正则
 # # https://community.helpsystems.com/forums/intermapper/miscellaneous-topics/5acc4fcf-fa83-e511-80cf-0050568460e4
-# IPV6_REG = r'((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))'  # noqa: E501
+# IPV6_REG = r'((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))'
 
 
 # def default_v4():  # 默认连接外网的ipv4
@@ -255,4 +246,3 @@ def update_records_from_json(
 #     else:
 #         regex_str = r'inet6 (?:addr\:\s*)?([\:\dabcdef]*)?[\s/%]'
 #     return _ip_regex_match(regex_str, reg)
-
