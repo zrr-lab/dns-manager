@@ -1,1 +1,1 @@
-# auto-dns
+# auto-ddns

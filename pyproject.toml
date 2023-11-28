@@ -7,6 +7,8 @@ authors = [
 ]
 dependencies = [
     "typer",
+    "loguru",
+    "rich",
     "tencentcloud-sdk-python-dnspod"
 ]
 requires-python = ">=3.12"
@@ -16,11 +18,11 @@ license = {text = "MIT"}
 [project.optional-dependencies]
 
 [project.scripts]
-auto-config = "auto_dns.__main__:app"
+auto-ddns = "auto_ddns.__main__:app"
 
 [tool.pdm.version]
 source = "scm"
-write_to = "auto_dns/__version__.py"
+write_to = "auto_ddns/__version__.py"
 write_template = "__version__ = '{}'"
 
 [tool.pdm.dev-dependencies]
@@ -32,7 +34,7 @@ test = [
 
 [tool.pdm.build]
 excludes = ["./**/.git"]
-includes = ["auto_dns"]
+includes = ["auto_ddns"]
 source-includes = ["tests", "LICENSE", "README.md"]
 editable-backend = "path"
 
@@ -47,16 +49,16 @@ extend-select = [
   "W",    # pycodestyle
   "YTT",  # flake8-2020
 ]
-src = ["auto_dns", "tests"]
+src = ["auto_ddns", "tests"]
 exclude = ["tests/fixtures"]
 target-version = "py311"
 
 [tool.ruff.isort]
-known-first-party = ["auto_dns"]
+known-first-party = ["auto_ddns"]
 required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.per-file-ignores]
-"__init__.py" = ["F401", "I002"] # Ignore unused imports in __init__.py
+"__init__.py" = ["F401", "I002"]
 
 [build-system]
 requires = ["pdm-backend"]

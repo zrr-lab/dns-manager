@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 import re
-from sys import stdout
 from typing import Sequence
 
 import typer
@@ -126,30 +125,25 @@ class Client:
         for record in new_records:
             name, value = record
             value, record_type = classify_record(value)
-            # name, record_type, value = record
             if (record_id := record_ids.get(name)) is None:
                 self.create_record(name, value, record_type)
-                logger.info(f"Create {record_type} record: {name} -> {value}")
+                logger.info(f"[bold blue]{record_type:<5}[/]: [green]{name} -> {value} (Modified)[/]")
             else:
                 self.modify_record(record_id, name, value, record_type)
-                logger.info(f"Modify {record_type} record: {name} -> {value}")
+                logger.info(f"[bold blue]{record_type:<5}[/]: [yellow]{name} -> {value} (Created)[/]")
 
 
-def update_records_from_dict(config: dict, *, log_level="INFO"):
-    logger.remove()
-    logger.add(stdout, level=log_level)
+def update_records_from_dict(config: dict):
     client = Client(config["domain"])
     client.update_records(config["records"])
 
 
-def update_records_from_json(path: str = "~/.config/autoconfig/dns.json", *, log_level="INFO"):
-    logger.remove()
-    logger.add(stdout, level=log_level)
+def update_records_from_json(path: str = "~/.config/autoconfig/dns.json"):
     path = os.path.expanduser(path)
     path = os.path.expandvars(path)
     with open(path) as f:
         config = json.load(f)
-    update_records_from_dict(config, log_level=log_level)
+    update_records_from_dict(config)
 
 
 # update_records_from_json()
