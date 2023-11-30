@@ -11,7 +11,7 @@ dependencies = [
     "rich",
     "tencentcloud-sdk-python-dnspod"
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.8"
 readme = "README.md"
 license = {text = "MIT"}
 
@@ -61,5 +61,5 @@ required-imports = ["from __future__ import annotations"]
 "__init__.py" = ["F401", "I002"]
 
 [build-system]
-requires = ["pdm-backend"]
+requires = ["pdm-backend", "pdm-pyfuture"]
 build-backend = "pdm.backend"
