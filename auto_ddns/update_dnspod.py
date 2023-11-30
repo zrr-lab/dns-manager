@@ -114,12 +114,7 @@ class Client:
         record_ids = {}
         for record in records:
             match json.loads(record.to_json_string()):
-                case {
-                    "RecordId": RecordId,
-                    "Name": Name,
-                    "Type": Type,
-                    **kwargs,
-                }:
+                case {"RecordId": RecordId, "Name": Name, "Type": Type, **kwargs}:
                     record_ids[Name] = RecordId
                     logger.debug(f"Type: {Type}, Name: {Name}, {kwargs}")
         for record in new_records:
@@ -127,10 +122,10 @@ class Client:
             value, record_type = classify_record(value)
             if (record_id := record_ids.get(name)) is None:
                 self.create_record(name, value, record_type)
-                logger.info(f"[bold blue]{record_type:<5}[/]: [green]{name} -> {value} (Modified)[/]")
+                logger.info(f"[bold blue]{record_type:<5}[/]: [green]{name} -> {value} (Created)[/]")
             else:
                 self.modify_record(record_id, name, value, record_type)
-                logger.info(f"[bold blue]{record_type:<5}[/]: [yellow]{name} -> {value} (Created)[/]")
+                logger.info(f"[bold blue]{record_type:<5}[/]: [yellow]{name} -> {value} (Modified)[/]")
 
 
 def update_records_from_dict(config: dict):
