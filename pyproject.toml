@@ -9,6 +9,7 @@ dependencies = [
     "typer",
     "loguru",
     "rich",
+    "pyparsing",
     "tencentcloud-sdk-python-dnspod"
 ]
 requires-python = ">=3.8"
