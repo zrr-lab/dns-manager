@@ -35,6 +35,7 @@ class Client:
                 "TENCENTCLOUD_SECRET_ID": secret_id,
                 "TENCENTCLOUD_SECRET_KEY": secret_key,
             }
+            os.makedirs(os.path.dirname(secret_path), exist_ok=True)
             with open(secret_path, "w") as f:
                 json.dump(token, f)
             logger.info(f"Secret saved to {secret_path}")
