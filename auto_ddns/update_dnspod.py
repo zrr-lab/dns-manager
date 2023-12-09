@@ -88,6 +88,21 @@ class Client:
         except TencentCloudSDKException as err:
             logger.warning(err)
 
+    def delete_record(self, record_id: str):
+        try:
+            req = models.DeleteRecordRequest()
+            params = {
+                "RecordId": record_id,
+                "Domain": self.domain,
+            }
+            req.from_json_string(json.dumps(params))
+
+            resp = self.client.DeleteRecord(req)
+            logger.debug(resp.to_json_string())
+
+        except TencentCloudSDKException as err:
+            logger.warning(err)
+
     def modify_record(self, record_id: str, sub_domain: str | list[str], value: str, record_type: str):
         sub_domain = ".".join(sub_domain) if isinstance(sub_domain, list) else sub_domain
         try:
