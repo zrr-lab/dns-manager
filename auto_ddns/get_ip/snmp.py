@@ -43,8 +43,6 @@ class SnmpWalker:
         return mapping_id_to_ip[mapping_name_to_id[interface]]
 
 
-def get_interface_ip(interface: str) -> str:
-    host = "ikuai.lab.bone6.top"
-    group = "public"
+def get_interface_ip(interface: str, *, host: str = "192.168.1.1", group: str = "public") -> str:
     walker = SnmpWalker(group, host)
     return walker.get_interface_ip(interface)
