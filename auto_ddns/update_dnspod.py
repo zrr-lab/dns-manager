@@ -25,8 +25,12 @@ class Client:
             with open(secret_path) as f:
                 token: dict = json.load(f)
         else:
-            secret_id = typer.prompt("Please input your tencentcloud secret id")
-            secret_key = typer.prompt("Please input your tencentcloud secret key")
+            secret_id = os.environ.get("TENCENTCLOUD_SECRET_ID", None)
+            secret_key = os.environ.get("TENCENTCLOUD_SECRET_KEY", None)
+            if secret_id is None:
+                secret_id = typer.prompt("Please input your tencentcloud secret id")
+            if secret_key is None:
+                secret_key = typer.prompt("Please input your tencentcloud secret key")
             token = {
                 "TENCENTCLOUD_SECRET_ID": secret_id,
                 "TENCENTCLOUD_SECRET_KEY": secret_key,
