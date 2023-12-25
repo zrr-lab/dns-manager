@@ -1,18 +1,10 @@
 from __future__ import annotations
 
-import json
-import os
+import re
 
-from .set_dns import DNSPodSetter
-
-
-def update_records_from_dict(config: dict, dns_setter: str = "dnspod"):
-    match dns_setter:
-        case "dnspod":
-            client = DNSPodSetter(config)
-        case _:
-            raise NotImplementedError("Only dnspod is supported now")
-    client.update_dns()
+from .getter import SnmpGetter
+from .model import Record
+from .setter import DNSPodSetter
 
 
 def create_setter_by_str(config: dict, dns_setter: str = "dnspod"):
@@ -24,9 +16,35 @@ def create_setter_by_str(config: dict, dns_setter: str = "dnspod"):
     return setter
 
 
-def update_records_from_json(path: str = "~/.config/autoconfig/dns.json"):
-    path = os.path.expanduser(path)
-    path = os.path.expandvars(path)
-    with open(path) as f:
-        config = json.load(f)
-    update_records_from_dict(config)
+def create_getter_by_str(config: dict, dns_setter: str = "dnspod"):
+    # match dns_setter:
+    #     case "dnspod":
+    #         setter = DNSPodSetter(config)
+    #     case _:
+    #         raise NotImplementedError("Only dnspod is supported now")
+    # return setter
+    pass
+
+
+def generate_record(name: str, value: str, domain: str = "127.0.0.1") -> Record:
+    host: str = "192.168.1.1"
+    group: str = "public"
+    # TODO: use config to get host and group
+
+    if value == "unknown":
+        return Record(subdomain=name, value=domain, type="A")
+
+    if ":" not in value:
+        if re.match(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", value):
+            record_type = "A"
+        else:
+            record_type = "CNAME"
+        return Record(subdomain=name, value=value, type=record_type)
+
+    match value.split():
+        case ("snmp:", interface_name):
+            record_type = "A"
+            walker = SnmpGetter(group, host, interface_name)
+        case _:
+            raise NotImplementedError("Only snmp is supported now")
+    return Record(subdomain=name, value=walker.get_ip(), type=record_type)

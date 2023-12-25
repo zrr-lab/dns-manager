@@ -5,7 +5,7 @@ from abc import abstractmethod
 from loguru import logger
 
 from ..model import Record
-from .utils import generate_record
+from ..utils import generate_record
 
 
 class DNSSetterBase:

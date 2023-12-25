@@ -1,1 +1,2 @@
-from .snmp import get_interface_ip
+from .base import IPGetterBase
+from .snmp import SnmpGetter, get_interface_ip

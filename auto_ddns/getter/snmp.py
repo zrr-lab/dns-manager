@@ -8,7 +8,7 @@ from pyparsing import Combine, Group, OneOrMore, ParserElement, Suppress, Word, 
 from .base import IPGetterBase
 
 
-class SnmpWalker(IPGetterBase):
+class SnmpGetter(IPGetterBase):
     mib_prefix = Suppress(Word(alphanums) + "-" + "MIB::" + Word(alphanums) + ".")
     name_prefix = Suppress("STRING:")
     integer_prefix = Suppress("INTEGER:")
@@ -51,5 +51,5 @@ class SnmpWalker(IPGetterBase):
 
 
 def get_interface_ip(interface: str, *, host: str = "192.168.1.1", group: str = "public") -> str:
-    walker = SnmpWalker(group, host, interface)
+    walker = SnmpGetter(group, host, interface)
     return walker.get_ip()
