@@ -6,6 +6,7 @@ import re
 from typing import Sequence
 
 import typer
+from cachetools import LRUCache, TTLCache, cached
 from loguru import logger
 from tencentcloud.common import credential
 from tencentcloud.common.exception.tencent_cloud_sdk_exception import (
@@ -15,14 +16,16 @@ from tencentcloud.dnspod.v20210323 import dnspod_client, models
 
 from auto_ddns.get_ip import get_interface_ip
 
+from .model import Record
+from .set_dns import DNSSetterBase
 
-class Client:
-    def __init__(self, domain: str, config_path="~/.config/autoconfig") -> None:
-        config_path = os.path.expanduser(config_path)
-        config_path = os.path.expandvars(config_path)
-        secret_path = f"{config_path}/token/tencentcloud.json"
-        if os.path.exists(secret_path):
-            with open(secret_path) as f:
+
+class DNSPodSetter(DNSSetterBase):
+    def __init__(self, config: dict, token_path="~/.config/autoconfig/token/tencentcloud.json") -> None:
+        token_path = os.path.expanduser(token_path)
+        token_path = os.path.expandvars(token_path)
+        if os.path.exists(token_path):
+            with open(token_path) as f:
                 token: dict = json.load(f)
         else:
             secret_id = os.environ.get("TENCENTCLOUD_SECRET_ID", None)
@@ -35,15 +38,18 @@ class Client:
                 "TENCENTCLOUD_SECRET_ID": secret_id,
                 "TENCENTCLOUD_SECRET_KEY": secret_key,
             }
-            os.makedirs(os.path.dirname(secret_path), exist_ok=True)
-            with open(secret_path, "w") as f:
+            os.makedirs(os.path.dirname(token_path), exist_ok=True)
+            with open(token_path, "w") as f:
                 json.dump(token, f)
-            logger.info(f"Secret saved to {secret_path}")
+            logger.info(f"Secret saved to {token_path}")
 
         cred = credential.Credential(token.get("TENCENTCLOUD_SECRET_ID"), token.get("TENCENTCLOUD_SECRET_KEY"))
 
         self.client = dnspod_client.DnspodClient(cred, "")
-        self.domain = domain
+        super().__init__(config)
+
+    def init_records_cache(self) -> None:
+        self.records_cache = {k.subdomain: k for k in self.mapping_record_to_id.keys()}
 
     def list_record(self) -> list[models.RecordListItem]:
         try:
@@ -60,21 +66,29 @@ class Client:
             logger.warning(err)
             return []
 
-    def classify_record(self, value: str) -> tuple[str, str]:
-        if value.startswith("snmp:"):
-            record_type = "A"
-            interface_name = value.strip("snmp:")
-            value = get_interface_ip(interface_name)
-        elif ":" in value or value == "unknown":
-            value = self.domain
-            record_type = "CNAME"
-        elif re.match(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", value):
-            record_type = "A"
-        else:
-            record_type = "CNAME"
-        return value, record_type
+    @property
+    @cached(cache=TTLCache(maxsize=10, ttl=300))
+    def mapping_record_to_id(self) -> dict[Record, str]:
+        _mapping_record_to_id = {}
+        remote_records = self.list_record()
+        for remote_record in remote_records:
+            match json.loads(remote_record.to_json_string()):
+                case {"RecordId": RecordId, "Name": Name, "Type": Type, "Value": Value, **kwargs}:
+                    _mapping_record_to_id[
+                        Record(
+                            subdomain=Name,
+                            value=Value,
+                            type=Type,
+                        )
+                    ] = RecordId
+                    logger.debug(f"Type: {Type}, Name: {Name}, {kwargs}")
+        return _mapping_record_to_id
 
-    def create_record(self, sub_domain: str | list[str], value: str, record_type: str):
+    def get_record_id(self, record: Record) -> str:
+        return self.mapping_record_to_id[record]
+
+    def create_record(self, record: Record):
+        sub_domain, value, record_type = record.subdomain, record.value, record.type
         sub_domain = ".".join(sub_domain) if isinstance(sub_domain, list) else sub_domain
         try:
             req = models.CreateRecordRequest()
@@ -108,7 +122,8 @@ class Client:
         except TencentCloudSDKException as err:
             logger.warning(err)
 
-    def modify_record(self, record_id: str, sub_domain: str | list[str], value: str, record_type: str):
+    def modify_record(self, record_id: str, record: Record):
+        sub_domain, value, record_type = record.subdomain, record.value, record.type
         sub_domain = ".".join(sub_domain) if isinstance(sub_domain, list) else sub_domain
         try:
             req = models.ModifyRecordRequest()
@@ -128,28 +143,10 @@ class Client:
         except TencentCloudSDKException as err:
             logger.warning(f"{sub_domain}: {err}")
 
-    def update_records(self, new_records: Sequence[tuple[str, str]]):
-        records = self.list_record()
-        record_ids = {}
-        for record in records:
-            match json.loads(record.to_json_string()):
-                case {"RecordId": RecordId, "Name": Name, "Type": Type, **kwargs}:
-                    record_ids[Name] = RecordId
-                    logger.debug(f"Type: {Type}, Name: {Name}, {kwargs}")
-        for record in new_records:
-            name, value = record
-            value, record_type = self.classify_record(value)
-            if (record_id := record_ids.get(name)) is None:
-                self.create_record(name, value, record_type)
-                logger.info(f"[green](Created ✨)[/] [bold blue]{record_type:<5}[/]: {name} -> {value}")
-            else:
-                self.modify_record(record_id, name, value, record_type)
-                logger.info(f"[yellow](Modified 🔄)[/] [bold blue]{record_type:<5}[/]: {name} -> {value}")
-
 
 def update_records_from_dict(config: dict):
-    client = Client(config["domain"])
-    client.update_records(config["records"])
+    client = DNSPodSetter(config)
+    client.update_dns()
 
 
 def update_records_from_json(path: str = "~/.config/autoconfig/dns.json"):

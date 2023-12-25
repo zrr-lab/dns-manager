@@ -5,7 +5,17 @@
 groups = ["default", "test"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:ad7368747bec147ab223ed383573b976e4053c30772aa2f6ac49b2c5c414f274"
+content_hash = "sha256:10661d1b04b0c91a20faaae3f7e7902232ae0dcd9d1f952b836ae6e60c628a2e"
+
+[[package]]
+name = "cachetools"
+version = "5.3.2"
+requires_python = ">=3.7"
+summary = "Extensible memoizing collections and decorators"
+files = [
+    {file = "cachetools-5.3.2-py3-none-any.whl", hash = "sha256:861f35a13a451f94e301ce2bec7cac63e881232ccce7ed67fab9b5df4d3beaa1"},
+    {file = "cachetools-5.3.2.tar.gz", hash = "sha256:086ee420196f7b2ab9ca2db2520aca326318b68fe5ba8bc4d49cca91add450f2"},
+]
 
 [[package]]
 name = "certifi"
@@ -83,6 +93,16 @@ files = [
     {file = "coverage-7.3.2-cp312-cp312-win_amd64.whl", hash = "sha256:7dbc3ed60e8659bc59b6b304b43ff9c3ed858da2839c78b804973f613d3e92ed"},
     {file = "coverage-7.3.2-pp38.pp39.pp310-none-any.whl", hash = "sha256:ae97af89f0fbf373400970c0a21eef5aa941ffeed90aee43650b81f7d7f47637"},
     {file = "coverage-7.3.2.tar.gz", hash = "sha256:be32ad29341b0170e795ca590e1c07e81fc061cb5b10c74ce7203491484404ef"},
+]
+
+[[package]]
+name = "exceptiongroup"
+version = "1.2.0"
+requires_python = ">=3.7"
+summary = "Backport of PEP 654 (exception groups)"
+files = [
+    {file = "exceptiongroup-1.2.0-py3-none-any.whl", hash = "sha256:4bfd3996ac73b41e9b9628b04e079f193850720ea5945fc96a08633c66912f14"},
+    {file = "exceptiongroup-1.2.0.tar.gz", hash = "sha256:91f5c769735f051a4290d52edd0858999b57e5876e9f85937691bd4c9fa3ed68"},
 ]
 
 [[package]]
@@ -173,15 +193,27 @@ files = [
 ]
 
 [[package]]
+name = "pyparsing"
+version = "3.1.1"
+requires_python = ">=3.6.8"
+summary = "pyparsing module - Classes and methods to define and execute parsing grammars"
+files = [
+    {file = "pyparsing-3.1.1-py3-none-any.whl", hash = "sha256:32c7c0b711493c72ff18a981d24f28aaf9c1fb7ed5e9667c9e84e3db623bdbfb"},
+    {file = "pyparsing-3.1.1.tar.gz", hash = "sha256:ede28a1a32462f5a9705e07aea48001a08f7cf81a021585011deba701581a0db"},
+]
+
+[[package]]
 name = "pytest"
 version = "7.4.3"
 requires_python = ">=3.7"
 summary = "pytest: simple powerful testing with Python"
 dependencies = [
     "colorama; sys_platform == \"win32\"",
+    "exceptiongroup>=1.0.0rc8; python_version < \"3.11\"",
     "iniconfig",
     "packaging",
     "pluggy<2.0,>=0.12",
+    "tomli>=1.0.0; python_version < \"3.11\"",
 ]
 files = [
     {file = "pytest-7.4.3-py3-none-any.whl", hash = "sha256:0d009c083ea859a71b76adf7c1d502e4bc170b80a8ef002da5806527b9591fac"},
@@ -225,6 +257,7 @@ summary = "Render rich text, tables, progress bars, syntax highlighting, markdow
 dependencies = [
     "markdown-it-py>=2.2.0",
     "pygments<3.0.0,>=2.13.0",
+    "typing-extensions<5.0,>=4.0.0; python_version < \"3.9\"",
 ]
 files = [
     {file = "rich-13.7.0-py3-none-any.whl", hash = "sha256:6da14c108c4866ee9520bbffa71f6fe3962e193b7da68720583850cd4548e235"},
@@ -253,6 +286,16 @@ dependencies = [
 files = [
     {file = "tencentcloud-sdk-python-dnspod-3.0.1039.tar.gz", hash = "sha256:d2be011858228324cbd30ca9e4de641198b819e2aca1385fc76eee824760e51e"},
     {file = "tencentcloud_sdk_python_dnspod-3.0.1039-py2.py3-none-any.whl", hash = "sha256:6e924831cf88538f9d0d6fa905476379c5283b02a9a3e7412dac510d9d6e88af"},
+]
+
+[[package]]
+name = "tomli"
+version = "2.0.1"
+requires_python = ">=3.7"
+summary = "A lil' TOML parser"
+files = [
+    {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
+    {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
 ]
 
 [[package]]

@@ -5,8 +5,10 @@ from typing import Iterable
 
 from pyparsing import Combine, Group, OneOrMore, ParserElement, Suppress, Word, alphanums, nums
 
+from .base import IPGetterBase
 
-class SnmpWalker:
+
+class SnmpWalker(IPGetterBase):
     mib_prefix = Suppress(Word(alphanums) + "-" + "MIB::" + Word(alphanums) + ".")
     name_prefix = Suppress("STRING:")
     integer_prefix = Suppress("INTEGER:")
@@ -20,9 +22,11 @@ class SnmpWalker:
     ip_address = Combine(Word(nums) + ("." + Word(nums)) * 3).set_results_name("ip_address")
     ip_pattern = OneOrMore(Group(mib_prefix + ip_address + equal_sign + integer_prefix + interface_id))
 
-    def __init__(self, group: str, host: str):
+    def __init__(self, group: str, host: str, interface: str):
         self.group = group
         self.host = host
+
+        self.interface = interface
 
     def walk(self, oid: str, pattern: ParserElement | None = None) -> Iterable[str]:
         cmd = f"snmpwalk -v 2c -c {self.group} {self.host} {oid}"
@@ -42,7 +46,10 @@ class SnmpWalker:
 
         return mapping_id_to_ip[mapping_name_to_id[interface]]
 
+    def get_ip(self):
+        return self.get_interface_ip(self.interface)
+
 
 def get_interface_ip(interface: str, *, host: str = "192.168.1.1", group: str = "public") -> str:
-    walker = SnmpWalker(group, host)
-    return walker.get_interface_ip(interface)
+    walker = SnmpWalker(group, host, interface)
+    return walker.get_ip()

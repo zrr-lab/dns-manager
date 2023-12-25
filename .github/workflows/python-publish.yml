@@ -55,7 +55,6 @@ jobs:
           skip-existing: true
           packages-dir: dist
           verbose: true
-
       - name: Publish GitHub Release 📝
         uses: softprops/action-gh-release@v1
         with:
