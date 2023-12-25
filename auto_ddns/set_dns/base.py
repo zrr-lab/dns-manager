@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import re
 from abc import abstractmethod
 
 from loguru import logger
 
-from ..get_ip import get_interface_ip
 from ..model import Record
 from .utils import generate_record
 
