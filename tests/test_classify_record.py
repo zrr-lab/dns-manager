@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from auto_ddns.update_dnspod import Client
+from auto_ddns.set_dns.dnspod import Client
 
 
 def test_update_dnspod():

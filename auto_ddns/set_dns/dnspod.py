@@ -16,8 +16,8 @@ from tencentcloud.dnspod.v20210323 import dnspod_client, models
 
 from auto_ddns.get_ip import get_interface_ip
 
-from .model import Record
-from .set_dns import DNSSetterBase
+from ..model import Record
+from .base import DNSSetterBase
 
 
 class DNSPodSetter(DNSSetterBase):
@@ -142,16 +142,3 @@ class DNSPodSetter(DNSSetterBase):
 
         except TencentCloudSDKException as err:
             logger.warning(f"{sub_domain}: {err}")
-
-
-def update_records_from_dict(config: dict):
-    client = DNSPodSetter(config)
-    client.update_dns()
-
-
-def update_records_from_json(path: str = "~/.config/autoconfig/dns.json"):
-    path = os.path.expanduser(path)
-    path = os.path.expandvars(path)
-    with open(path) as f:
-        config = json.load(f)
-    update_records_from_dict(config)

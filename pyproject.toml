@@ -38,7 +38,6 @@ includes = ["auto_ddns"]
 [tool.ruff]
 line-length = 120
 src = ["auto_ddns", "tests"]
-exclude = ["tests/fixtures"]
 target-version = "py311"
 
 [tool.ruff.lint]
@@ -50,6 +49,9 @@ select = [
   "RUF",  # ruff
   "W",    # pycodestyle
   "YTT",  # flake8-2020
+]
+ignore = [
+    "F841"
 ]
 
 [tool.ruff.lint.isort]
