@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from ..get_ip import get_interface_ip
+from ..getter import get_interface_ip
 from ..model import Record
 
 

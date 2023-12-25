@@ -38,8 +38,9 @@ def daemon(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str
     setter_obj = create_setter_by_str(config, setter)
     while True:
         setter_obj.update_dns()
-        logger.info("Sleeping for 300 seconds")
-        time.sleep(300)
+        interval = 300
+        logger.info(f"Sleeping for {interval} seconds")
+        time.sleep(interval)
 
 
 if __name__ == "__main__":
