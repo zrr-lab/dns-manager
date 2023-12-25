@@ -36,7 +36,9 @@ class DNSSetterBase:
             elif record != new_records[subdomain]:
                 self.modify_record(self.get_record_id(record), record)
                 self.records_cache[subdomain] = record
-                logger.info(f"[yellow](Modified 🔄)[/] [bold blue]{record.type:<5}[/]: {subdomain} -> {record.value}")
+                logger.info(
+                    f"[yellow](Modified 🔄)[/] [bold blue]{record.type:<5}[/]: {subdomain} [bold blue]➡️[/] {record.value}"
+                )
 
         # TODO: delete records which are not in new_records
 
