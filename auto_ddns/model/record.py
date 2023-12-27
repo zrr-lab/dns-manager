@@ -9,7 +9,7 @@ class Record(BaseModel):
     type: str | None = None
 
     def __hash__(self) -> int:
-        return hash((self.subdomain))
+        return hash(self.subdomain)
 
     def __eq__(self, other: Record) -> bool:
         return self.subdomain == other.subdomain and self.value == other.value and self.type == other.type

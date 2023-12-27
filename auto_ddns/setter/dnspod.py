@@ -45,7 +45,7 @@ class DNSPodSetter(DNSSetterBase):
         super().__init__(config)
 
     def init_records_cache(self) -> None:
-        self.records_cache = {k.subdomain: k for k in self.mapping_record_to_id.keys()}
+        self.records_cache = {k.subdomain: k for k in self.mapping_record_to_id}
 
     def list_record(self) -> list[models.RecordListItem]:
         try:

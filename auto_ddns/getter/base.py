@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-class IPGetterBase(object):
+class IPGetterBase:
     def __init__(self, config: dict):
         self.update_config(config)
 
