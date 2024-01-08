@@ -5,7 +5,6 @@ from abc import abstractmethod
 from loguru import logger
 
 from ..model import Record
-from ..utils import generate_record
 
 
 class DNSSetterBase:
@@ -19,6 +18,8 @@ class DNSSetterBase:
         self.record_config: list[tuple[str, str]] = config["records"]
 
     def get_records(self) -> dict[str, Record]:
+        from ..utils import generate_record
+
         records: dict[str, Record] = {}
         for subdomain, value in self.record_config:
             records[subdomain] = generate_record(subdomain, value)

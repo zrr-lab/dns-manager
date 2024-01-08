@@ -27,10 +27,6 @@ def create_getter_by_str(config: dict, dns_setter: str = "dnspod"):
 
 
 def generate_record(name: str, value: str, domain: str = "127.0.0.1") -> Record:
-    host: str = "192.168.1.1"
-    group: str = "public"
-    # TODO: use config to get host and group
-
     if value == "unknown":
         return Record(subdomain=name, value=domain, type="A")
 
@@ -38,9 +34,12 @@ def generate_record(name: str, value: str, domain: str = "127.0.0.1") -> Record:
         record_type = "A" if re.match("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", value) else "CNAME"
         return Record(subdomain=name, value=value, type=record_type)
 
-    match value.split():
-        case ("snmp:", interface_name):
+    match value.split(":"):
+        case ("snmp", interface_name):
             record_type = "A"
+            host: str = "192.168.1.1"
+            group: str = "public"
+            # TODO: use config to get host and group
             walker = SnmpGetter(group, host, interface_name)
         case _:
             raise NotImplementedError("Only snmp is supported now")
