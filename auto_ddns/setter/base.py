@@ -29,18 +29,21 @@ class DNSSetterBase:
         new_records = self.get_records()
         for subdomain, record in new_records.items():
             arrow = "[bold blue]➡️[/]"
-            if subdomain not in self.records_cache:
+            record_cache = self.records_cache.get(subdomain, None)
+            if record_cache is None:
                 self.create_record(record)
                 self.records_cache[subdomain] = record
                 logger.info(
                     f"[green](Created ✨)[/] [bold blue]{record.type:<5}[/]: {subdomain} {arrow} {record.value}"
                 )
-            elif record != new_records[subdomain]:
-                self.modify_record(self.get_record_id(record), record)
+            elif record != record_cache:
+                self.modify_record(self.get_record_id(record_cache), record)
                 self.records_cache[subdomain] = record
                 logger.info(
                     f"[yellow](Modified 🔄)[/] [bold blue]{record.type:<5}[/]: {subdomain} {arrow} {record.value}"
                 )
+            else:
+                logger.info(f"[blue](Exists ✅)[/] [bold blue]{record.type:<5}[/]: {subdomain} {arrow} {record.value}")
 
         # TODO: delete records which are not in new_records
 

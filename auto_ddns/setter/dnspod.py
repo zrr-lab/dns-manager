@@ -59,11 +59,10 @@ class DNSPodSetter(DNSSetterBase):
             return resp.RecordList
 
         except TencentCloudSDKException as err:
-            logger.warning(err)
+            logger.exception(err)
             return []
 
     @property
-    @cached(cache=TTLCache(maxsize=10, ttl=300))
     def mapping_record_to_id(self) -> dict[Record, str]:
         _mapping_record_to_id = {}
         remote_records = self.list_record()
@@ -80,6 +79,7 @@ class DNSPodSetter(DNSSetterBase):
                     logger.debug(f"Type: {Type}, Name: {Name}, {kwargs}")
         return _mapping_record_to_id
 
+    @cached(cache=TTLCache(maxsize=10, ttl=300))
     def get_record_id(self, record: Record) -> str:
         return self.mapping_record_to_id[record]
 
@@ -101,7 +101,7 @@ class DNSPodSetter(DNSSetterBase):
             logger.debug(resp.to_json_string())
 
         except TencentCloudSDKException as err:
-            logger.warning(err)
+            logger.exception(err)
 
     def delete_record(self, record_id: str):
         try:
@@ -116,7 +116,7 @@ class DNSPodSetter(DNSSetterBase):
             logger.debug(resp.to_json_string())
 
         except TencentCloudSDKException as err:
-            logger.warning(err)
+            logger.exception(err)
 
     def modify_record(self, record_id: str, record: Record):
         sub_domain, value, record_type = record.subdomain, record.value, record.type
