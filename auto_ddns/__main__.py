@@ -9,10 +9,11 @@ import watchfiles
 from loguru import logger
 from rich.console import Console
 from rich.highlighter import NullHighlighter
+from rich.live import Live
 from rich.logging import RichHandler
+from rich.progress import Progress, TextColumn
 from rich.style import Style
 
-from auto_ddns.setter import DNSSetterBase
 from auto_ddns.utils import create_setter_by_str
 
 app = typer.Typer()
@@ -27,7 +28,7 @@ def init_logger(log_level: str):
 @app.command()
 def update(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str = "dnspod", log_level: str = "INFO"):
     init_logger(log_level)
-    logger.info(f"Loading config from [bold purple]{path}[/]")
+    logger.info(f"Loading config from [bold purple]{path}[/].")
     with open(path.expanduser()) as f:
         config = json.load(f)
     setter_obj = create_setter_by_str(config, setter)
@@ -38,48 +39,41 @@ def update(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str
 def daemon(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str = "dnspod", log_level: str = "INFO"):
     init_logger(log_level)
     path = path.expanduser()
-    queue = asyncio.Queue()
+    asyncio.run(daemon_async(path, setter))
 
-    async def watch_config(queue: asyncio.Queue[DNSSetterBase]):
-        logger.info(f"Loading config from [bold purple]{path}[/]")
-        with open(path) as f:
-            config = json.load(f)
-        setter_obj = create_setter_by_str(config, setter)
-        await queue.put(setter_obj)
 
-        for _ in watchfiles.watch(path):
-            logger.info(f"Config file changed, reloading config from [bold purple]{path}[/]")
+async def daemon_async(path: Path, setter: str):
+    logger.info(f"Loading config from [bold purple]{path}[/].")
+    with open(path) as f:
+        config = json.load(f)
+    setter_obj = create_setter_by_str(config, setter)
+    interval = int(config.get("interval", 300))
+    progress = Progress(TextColumn("{task.description}: [bold blue]{task.completed}s/{task.total}s[/]"), transient=True)
+    countdown = progress.add_task("Update Timer", total=interval)
+
+    async def watch_config():
+        async for _ in watchfiles.awatch(path):
             with open(path) as f:
                 config = json.load(f)
-            setter_obj = create_setter_by_str(config, setter)
-            await queue.put(setter_obj)
+            await setter_obj.update_config_async(config)
+            progress.update(countdown, completed=interval, description="Update Timer([bold]Reloading Config[/])")
 
-    async def update_dns(queue: asyncio.Queue[DNSSetterBase]):
-        setter_obj = await queue.get()
+    async def update_dns():
         while True:
             setter_obj.update_dns()
-            interval = 300
-            logger.info(f"Sleeping for {interval} seconds")
-            while True:
-                await asyncio.sleep(1)
-                if not queue.empty():
-                    setter_obj = await queue.get()
-                    break
+            progress.reset(countdown, description="Update Timer")
 
-    watch_task = asyncio.create_task(watch_config(queue))
-    update_task = asyncio.create_task(update_dns(queue))
+            with Live(progress):
+                while not progress.finished:
+                    progress.update(countdown, advance=1)
+                    await asyncio.sleep(1)
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_until_complete(
-            asyncio.gather(
-                watch_task,
-                update_task,
-            )
-        )
-    finally:
-        loop.close()
+    update_task = asyncio.create_task(update_dns())
+    watch_task = asyncio.create_task(watch_config())
+    await asyncio.gather(
+        update_task,
+        watch_task,
+    )
 
 
 if __name__ == "__main__":
