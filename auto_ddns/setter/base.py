@@ -1,10 +1,33 @@
 from __future__ import annotations
 
+import asyncio
 from abc import abstractmethod
+from enum import Enum
 
 from loguru import logger
 
 from ..model import Record
+
+
+class RecordStatus(Enum):
+    CREATED = "CREATED"
+    MODIFIED = "MODIFIED"
+    EXISTS = "EXISTS"
+    DELETED = "DELETED"
+    FAILED = "FAILED"
+
+    def __str__(self) -> str:
+        match self.value:
+            case "CREATED":
+                return "[green]✨ Created[/]"
+            case "MODIFIED":
+                return "[yellow]🔄 Modified[/]"
+            case "EXISTS":
+                return "[blue]✅ Exists[/]"
+            case "DELETED":
+                return "[red]🔥 Deleted[/]"
+            case "FAILED":
+                return "[red]❌ Failed[/]"
 
 
 class DNSSetterBase:
@@ -16,6 +39,11 @@ class DNSSetterBase:
     def update_config(self, config):
         self.domain = config["domain"]
         self.record_config: list[tuple[str, str]] = config["records"]
+
+    async def update_config_async(self, config):
+        self.domain = config["domain"]
+        self.record_config: list[tuple[str, str]] = config["records"]
+        await asyncio.sleep(0)
 
     def get_records(self) -> dict[str, Record]:
         from ..utils import generate_record
@@ -31,19 +59,15 @@ class DNSSetterBase:
             arrow = "[bold blue]➡️[/]"
             record_cache = self.records_cache.get(subdomain, None)
             if record_cache is None:
-                self.create_record(record)
-                self.records_cache[subdomain] = record
-                logger.info(
-                    f"[green](Created ✨)[/] [bold blue]{record.type:<5}[/]: {subdomain} {arrow} {record.value}"
-                )
+                status = self.create_record(record)
             elif record != record_cache:
-                self.modify_record(self.get_record_id(record_cache), record)
-                self.records_cache[subdomain] = record
-                logger.info(
-                    f"[yellow](Modified 🔄)[/] [bold blue]{record.type:<5}[/]: {subdomain} {arrow} {record.value}"
-                )
+                status = self.modify_record(self.get_record_id(record_cache), record)
             else:
-                logger.info(f"[blue](Exists ✅)[/] [bold blue]{record.type:<5}[/]: {subdomain} {arrow} {record.value}")
+                status = RecordStatus.EXISTS
+
+            if status in (RecordStatus.CREATED, RecordStatus.MODIFIED):
+                self.records_cache[subdomain] = record
+            logger.info(f"{status} [bold blue]{record.type}[/]: {subdomain} {arrow} {record.value}")
 
         # TODO: delete records which are not in new_records
 
@@ -56,13 +80,13 @@ class DNSSetterBase:
         pass
 
     @abstractmethod
-    def create_record(self, record: Record):
+    def create_record(self, record: Record) -> RecordStatus:
         pass
 
     @abstractmethod
-    def delete_record(self, record_id: str):
+    def delete_record(self, record_id: str) -> RecordStatus:
         pass
 
     @abstractmethod
-    def modify_record(self, record_id: str, record: Record):
+    def modify_record(self, record_id: str, record: Record) -> RecordStatus:
         pass

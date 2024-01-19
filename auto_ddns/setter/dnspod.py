@@ -13,7 +13,7 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import (
 from tencentcloud.dnspod.v20210323 import dnspod_client, models
 
 from ..model import Record
-from .base import DNSSetterBase
+from .base import DNSSetterBase, RecordStatus
 
 
 class DNSPodSetter(DNSSetterBase):
@@ -83,7 +83,7 @@ class DNSPodSetter(DNSSetterBase):
     def get_record_id(self, record: Record) -> str:
         return self.mapping_record_to_id[record]
 
-    def create_record(self, record: Record):
+    def create_record(self, record: Record) -> RecordStatus:
         sub_domain, value, record_type = record.subdomain, record.value, record.type
         sub_domain = ".".join(sub_domain) if isinstance(sub_domain, list) else sub_domain
         try:
@@ -99,11 +99,13 @@ class DNSPodSetter(DNSSetterBase):
 
             resp = self.client.CreateRecord(req)
             logger.debug(resp.to_json_string())
+            return RecordStatus.CREATED
 
         except TencentCloudSDKException as err:
             logger.exception(err)
+            return RecordStatus.FAILED
 
-    def delete_record(self, record_id: str):
+    def delete_record(self, record_id: str) -> RecordStatus:
         try:
             req = models.DeleteRecordRequest()
             params = {
@@ -114,11 +116,13 @@ class DNSPodSetter(DNSSetterBase):
 
             resp = self.client.DeleteRecord(req)
             logger.debug(resp.to_json_string())
+            return RecordStatus.DELETED
 
         except TencentCloudSDKException as err:
             logger.exception(err)
+            return RecordStatus.FAILED
 
-    def modify_record(self, record_id: str, record: Record):
+    def modify_record(self, record_id: str, record: Record) -> RecordStatus:
         sub_domain, value, record_type = record.subdomain, record.value, record.type
         sub_domain = ".".join(sub_domain) if isinstance(sub_domain, list) else sub_domain
         try:
@@ -135,6 +139,8 @@ class DNSPodSetter(DNSSetterBase):
 
             resp = self.client.ModifyRecord(req)
             logger.debug(resp.to_json_string())
+            return RecordStatus.MODIFIED
 
         except TencentCloudSDKException as err:
             logger.warning(f"{sub_domain}: {err}")
+            return RecordStatus.FAILED
