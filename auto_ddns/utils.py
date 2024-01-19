@@ -31,7 +31,11 @@ def generate_record(name: str, value: str, domain: str = "127.0.0.1") -> Record:
         return Record(subdomain=name, value=domain, type="A")
 
     if ":" not in value:
-        record_type = "A" if re.match("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", value) else "CNAME"
+        if re.match("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", value):
+            record_type = "A"
+        else:
+            record_type = "CNAME"
+            value = value if value.endswith(".") else f"{value}."
         return Record(subdomain=name, value=value, type=record_type)
 
     match value.split(":"):
