@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import re
 
+from auto_token import get_config, get_token
+
 from .getter import SnmpGetter
 from .model import Record
 from .setter import DNSPodSetter
 
 
 def create_setter_by_str(config: dict, dns_setter: str = "dnspod"):
+    token = get_token("dnspod", get_config(), create=True)
     match dns_setter:
         case "dnspod":
-            setter = DNSPodSetter(config)
+            setter = DNSPodSetter(config, token)
         case _:
             raise NotImplementedError("Only dnspod is supported now")
     return setter

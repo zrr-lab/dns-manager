@@ -28,7 +28,7 @@ def init_logger(log_level: str):
 @app.command()
 def update(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str = "dnspod", log_level: str = "INFO"):
     init_logger(log_level)
-    logger.info(f"Loading config from [bold purple]{path}[/].")
+    logger.info(f"Loading dns config from [bold purple]{path}[/].")
     with open(path.expanduser()) as f:
         config = json.load(f)
     setter_obj = create_setter_by_str(config, setter)
@@ -43,7 +43,7 @@ def daemon(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str
 
 
 async def daemon_async(path: Path, setter: str):
-    logger.info(f"Loading config from [bold purple]{path}[/].")
+    logger.info(f"Loading dns config from [bold purple]{path}[/].")
     with open(path) as f:
         config = json.load(f)
     setter_obj = create_setter_by_str(config, setter)

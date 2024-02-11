@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 
-import typer
+from auto_token.model import Token
 from cachetools import TTLCache, cached
 from loguru import logger
 from tencentcloud.common import credential
@@ -17,30 +17,17 @@ from .base import DNSSetterBase, RecordStatus
 
 
 class DNSPodSetter(DNSSetterBase):
-    def __init__(self, config: dict, token_path="~/.config/autoconfig/token/tencentcloud.json") -> None:
-        token_path = os.path.expanduser(token_path)
-        token_path = os.path.expandvars(token_path)
-        if os.path.exists(token_path):
-            with open(token_path) as f:
-                token: dict = json.load(f)
+    def __init__(self, config: dict, token: Token | None = None) -> None:
+        if token is not None:
+            logger.info(f"Secret not found in env, load using token: {token.name}")
+            envs = {env.name: env.value for env in token.envs}
+            secret_id = envs.get("TENCENTCLOUD_SECRET_ID", None)
+            secret_key = envs.get("TENCENTCLOUD_SECRET_KEY", None)
         else:
             secret_id = os.environ.get("TENCENTCLOUD_SECRET_ID", None)
             secret_key = os.environ.get("TENCENTCLOUD_SECRET_KEY", None)
-            if secret_id is None:
-                secret_id = typer.prompt("Please input your tencentcloud secret id")
-            if secret_key is None:
-                secret_key = typer.prompt("Please input your tencentcloud secret key")
-            token = {
-                "TENCENTCLOUD_SECRET_ID": secret_id,
-                "TENCENTCLOUD_SECRET_KEY": secret_key,
-            }
-            os.makedirs(os.path.dirname(token_path), exist_ok=True)
-            with open(token_path, "w") as f:
-                json.dump(token, f)
-            logger.info(f"Secret saved to {token_path}")
 
-        cred = credential.Credential(token.get("TENCENTCLOUD_SECRET_ID"), token.get("TENCENTCLOUD_SECRET_KEY"))
-
+        cred = credential.Credential(secret_id, secret_key)
         self.client = dnspod_client.DnspodClient(cred, "")
         super().__init__(config)
 
