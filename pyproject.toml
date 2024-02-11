@@ -6,13 +6,14 @@ authors = [
     {name = "Zhan Rongrui", email = "2742392377@qq.com"},
 ]
 dependencies = [
+    "tencentcloud-sdk-python-dnspod",
     "loguru>=0.7.2",
     "rich>=13.7.0",
     "pyparsing>=3.1.1",
-    "typer>=0.9.0",
-    "tencentcloud-sdk-python-dnspod",
+    "typer[all]>=0.9.0",
     "cachetools>=5.3.2",
     "pydantic>=2.5.3",
+    "auto-token>=0.0.2",
 ]
 requires-python = ">=3.8"
 readme = "README.md"
