@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 from auto_token import get_config, get_token
 
@@ -51,3 +52,24 @@ def generate_record(name: str, value: str, domain: str = "127.0.0.1") -> Record:
         case _:
             raise NotImplementedError("Only snmp is supported now")
     return Record(subdomain=name, value=walker.get_ip(), type=record_type)
+
+
+def load_config(path: Path) -> dict:
+    path = path.expanduser()
+    with open(path.expanduser()) as f:
+        if path.suffix == ".json":
+            import json
+
+            config = json.load(f)
+        elif path.suffix == ".toml":
+            import toml
+
+            config = toml.load(f)
+        elif path.suffix == ".yaml":
+            import yaml
+            from yaml import FullLoader
+
+            config = yaml.load(f, Loader=FullLoader)
+        else:
+            raise NotImplementedError(f"Unsupportted suffix {path.suffix}")
+    return config

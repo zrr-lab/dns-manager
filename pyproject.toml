@@ -14,6 +14,8 @@ dependencies = [
     "cachetools>=5.3.2",
     "pydantic>=2.5.3",
     "auto-token>=0.0.4",
+    "PyYaml>=6.0.1",
+    "toml>=0.10.2",
 ]
 requires-python = ">=3.8"
 readme = "README.md"

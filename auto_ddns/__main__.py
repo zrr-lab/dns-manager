@@ -14,7 +14,7 @@ from rich.logging import RichHandler
 from rich.progress import Progress, TextColumn
 from rich.style import Style
 
-from auto_ddns.utils import create_setter_by_str
+from auto_ddns.utils import create_setter_by_str, load_config
 
 app = typer.Typer()
 
@@ -29,8 +29,7 @@ def init_logger(log_level: str):
 def update(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str = "dnspod", log_level: str = "INFO"):
     init_logger(log_level)
     logger.info(f"Loading dns config from [bold purple]{path}[/].")
-    with open(path.expanduser()) as f:
-        config = json.load(f)
+    config = load_config(path)
     setter_obj = create_setter_by_str(config, setter)
     setter_obj.update_dns()
 
@@ -44,8 +43,7 @@ def daemon(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str
 
 async def daemon_async(path: Path, setter: str):
     logger.info(f"Loading dns config from [bold purple]{path}[/].")
-    with open(path) as f:
-        config = json.load(f)
+    config = load_config(path)
     setter_obj = create_setter_by_str(config, setter)
     interval = int(config.get("interval", 300))
     progress = Progress(TextColumn("{task.description}: [bold blue]{task.completed}s/{task.total}s[/]"), transient=True)
