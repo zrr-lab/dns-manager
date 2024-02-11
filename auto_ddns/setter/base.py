@@ -6,7 +6,7 @@ from enum import Enum
 
 from loguru import logger
 
-from ..model import Record
+from ..model import Config, Record
 
 
 class RecordStatus(Enum):
@@ -33,16 +33,22 @@ class RecordStatus(Enum):
 class DNSSetterBase:
     def __init__(self, config: dict):
         self.records_cache: dict[str, Record] = {}
-        self.update_config(config)
+        self.update_config(Config.model_validate(config))
         self.init_records_cache()
 
-    def update_config(self, config):
-        self.domain = config["domain"]
-        self.record_config: list[tuple[str, str]] = config["records"]
+    def update_config(self, config: Config):
+        self.domain = config.domain
+        records: list[tuple[str, str]] = []
+        for record in config.records:
+            # TODO: maybe better method
+            if isinstance(record[0], str):
+                records.append(record)  # type: ignore  # noqa: PGH003
+            else:
+                records.extend([(subdomain, record[1]) for subdomain in record[0]])
+        self.record_config = records
 
-    async def update_config_async(self, config):
-        self.domain = config["domain"]
-        self.record_config: list[tuple[str, str]] = config["records"]
+    async def update_config_async(self, config: Config):
+        self.update_config(config)
         await asyncio.sleep(0)
 
     def get_records(self) -> dict[str, Record]:
@@ -67,7 +73,7 @@ class DNSSetterBase:
 
             if status in (RecordStatus.CREATED, RecordStatus.MODIFIED):
                 self.records_cache[subdomain] = record
-            logger.info(f"{status} [bold blue]{record.type}[/]: {subdomain} {arrow} {record.value}")
+            logger.info(f"({status}) [bold blue]{record.type}[/]: {subdomain} {arrow} {record.value}")
 
         # TODO: delete records which are not in new_records
 
