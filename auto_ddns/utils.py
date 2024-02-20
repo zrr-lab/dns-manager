@@ -5,7 +5,7 @@ from pathlib import Path
 
 from auto_token import get_config, get_token
 
-from .getter import SnmpGetter
+from .getter import PublicGetter, SnmpGetter
 from .model import Record
 from .setter import DNSPodSetter
 
@@ -30,10 +30,7 @@ def create_getter_by_str(config: dict, dns_setter: str = "dnspod"):
     pass
 
 
-def generate_record(name: str, value: str | None, default_domain: str = "127.0.0.1") -> Record:
-    if value == "unknown" or value is None:
-        value = default_domain
-
+def generate_record(name: str, value: str) -> Record:
     if ":" not in value:
         if re.match("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", value):
             record_type = "A"
@@ -49,6 +46,9 @@ def generate_record(name: str, value: str | None, default_domain: str = "127.0.0
             group: str = "public"
             # TODO: use config to get host and group
             getter = SnmpGetter(group, host, interface_name)
+        case ("public", url):
+            record_type = "A"
+            getter = PublicGetter(url)
         case _:
             raise NotImplementedError("Only snmp is supported now")
     return Record(subdomain=name, value=getter.get_ip(), type=record_type)

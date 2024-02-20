@@ -39,12 +39,13 @@ class DNSSetterBase:
     def update_config(self, config: Config):
         self.domain = config.domain
         records: list[tuple[str, str]] = []
-        for record in config.records:
-            # TODO: maybe better method
-            if isinstance(record[0], str):
-                records.append(record)  # type: ignore  # noqa: PGH003
+        for name, value in config.records:
+            if value == "unknown" or value is None:
+                value = self.domain
+            if isinstance(name, str):
+                records.append((name, value))
             else:
-                records.extend([(subdomain, record[1]) for subdomain in record[0]])
+                records.extend([(subdomain, value) for subdomain in name])
         self.record_config = records
 
     async def update_config_async(self, config: Config):
@@ -56,7 +57,7 @@ class DNSSetterBase:
 
         records: dict[str, Record] = {}
         for subdomain, value in self.record_config:
-            records[subdomain] = generate_record(subdomain, value, self.domain)
+            records[subdomain] = generate_record(subdomain, value)
         return records
 
     def update_dns(self):
