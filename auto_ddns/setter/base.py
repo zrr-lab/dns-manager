@@ -56,7 +56,7 @@ class DNSSetterBase:
 
         records: dict[str, Record] = {}
         for subdomain, value in self.record_config:
-            records[subdomain] = generate_record(subdomain, value)
+            records[subdomain] = generate_record(subdomain, value, self.domain)
         return records
 
     def update_dns(self):

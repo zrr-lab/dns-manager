@@ -30,9 +30,9 @@ def create_getter_by_str(config: dict, dns_setter: str = "dnspod"):
     pass
 
 
-def generate_record(name: str, value: str, domain: str = "127.0.0.1") -> Record:
-    if value == "unknown":
-        return Record(subdomain=name, value=domain, type="A")
+def generate_record(name: str, value: str | None, default_domain: str = "127.0.0.1") -> Record:
+    if value == "unknown" or value is None:
+        value = default_domain
 
     if ":" not in value:
         if re.match("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", value):
@@ -48,10 +48,10 @@ def generate_record(name: str, value: str, domain: str = "127.0.0.1") -> Record:
             host: str = "192.168.1.1"
             group: str = "public"
             # TODO: use config to get host and group
-            walker = SnmpGetter(group, host, interface_name)
+            getter = SnmpGetter(group, host, interface_name)
         case _:
             raise NotImplementedError("Only snmp is supported now")
-    return Record(subdomain=name, value=walker.get_ip(), type=record_type)
+    return Record(subdomain=name, value=getter.get_ip(), type=record_type)
 
 
 def load_config(path: Path) -> dict:

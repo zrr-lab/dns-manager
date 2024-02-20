@@ -16,8 +16,9 @@ dependencies = [
     "auto-token>=0.0.4",
     "PyYaml>=6.0.1",
     "toml>=0.10.2",
+    "httpx>=0.26.0",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
 

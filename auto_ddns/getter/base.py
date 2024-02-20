@@ -9,4 +9,4 @@ class IPGetterBase:
         self.config: list[tuple[str, str]] = config
 
     def get_ip(self):
-        raise NotImplementedError("You must implement this g")
+        raise NotImplementedError("Please implement this method")

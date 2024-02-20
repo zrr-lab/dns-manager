@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 
 import typer
-import watchfiles
 from loguru import logger
 from rich.console import Console
 from rich.highlighter import NullHighlighter
@@ -35,13 +34,15 @@ def update(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str
 
 
 @app.command()
-def daemon(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str = "dnspod", log_level: str = "INFO"):
+def watch(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str = "dnspod", log_level: str = "INFO"):
     init_logger(log_level)
     path = path.expanduser()
-    asyncio.run(daemon_async(path, setter))
+    asyncio.run(watch_async(path, setter))
 
 
-async def daemon_async(path: Path, setter: str):
+async def watch_async(path: Path, setter: str):
+    import watchfiles
+
     logger.info(f"Loading dns config from [bold purple]{path}[/].")
     config = load_config(path)
     setter_obj = create_setter_by_str(config, setter)
