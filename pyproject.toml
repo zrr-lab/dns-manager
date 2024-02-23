@@ -1,7 +1,7 @@
 [project]
 name = "dns-manager"
 dynamic = ["version"]
-description = "auto config dns"
+description = "Manage your DNS records with ease."
 authors = [
     {name = "Zhan Rongrui", email = "2742392377@qq.com"},
 ]
@@ -18,7 +18,7 @@ dependencies = [
     "toml>=0.10.2",
     "httpx>=0.26.0",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 readme = "README.md"
 license = {text = "MIT"}
 

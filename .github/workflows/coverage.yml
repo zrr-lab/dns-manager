@@ -7,33 +7,27 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   coverage:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
+      - name: Checkout 📦
         uses: actions/checkout@v4
-
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@v3
+      - name: Setup PDM 📦
+        uses: pdm-project/setup-pdm@v4
         with:
           python-version: "3.12"
-
-      - name: Install dependencies
-        run: pdm install
-
-      - name: Run tests and coverage
+      - name: Run tests and coverage ✅
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENTCLOUD_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENTCLOUD_SECRET_KEY }}
         run: |
+          pdm install
           pdm run coverage run -m pytest tests
           pdm run coverage html --show-contexts --title "Coverage for ${{ github.sha }}"
-
-      - name: Store coverage HTML
+      - name: Store coverage HTML 🚀
         uses: actions/upload-artifact@v3
         with:
           name: coverage-html
