@@ -13,7 +13,7 @@ from rich.logging import RichHandler
 from rich.progress import Progress, TextColumn
 from rich.style import Style
 
-from auto_ddns.utils import create_setter_by_str, load_config
+from dns_manager.utils import create_setter_by_str, load_config
 
 app = typer.Typer()
 
@@ -25,7 +25,7 @@ def init_logger(log_level: str):
 
 
 @app.command()
-def update(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str = "dnspod", log_level: str = "INFO"):
+def update(path: Path = Path("~/.config/autoconfig/dns-manager.json"), setter: str = "dnspod", log_level: str = "INFO"):
     init_logger(log_level)
     logger.info(f"Loading dns config from [bold purple]{path}[/].")
     config = load_config(path)
@@ -34,7 +34,7 @@ def update(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str
 
 
 @app.command()
-def watch(path: Path = Path("~/.config/autoconfig/auto-ddns.json"), setter: str = "dnspod", log_level: str = "INFO"):
+def watch(path: Path = Path("~/.config/autoconfig/dns-manager.json"), setter: str = "dnspod", log_level: str = "INFO"):
     init_logger(log_level)
     path = path.expanduser()
     asyncio.run(watch_async(path, setter))

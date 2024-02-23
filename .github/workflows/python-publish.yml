@@ -58,5 +58,5 @@ jobs:
       - name: Publish GitHub Release 📝
         uses: softprops/action-gh-release@v1
         with:
-          name: auto-ddns ${{github.ref_name}}
+          name: dns-manager ${{github.ref_name}}
           generate_release_notes: true

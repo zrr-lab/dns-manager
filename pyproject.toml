@@ -1,5 +1,5 @@
 [project]
-name = "auto-ddns"
+name = "dns-manager"
 dynamic = ["version"]
 description = "auto config dns"
 authors = [
@@ -24,14 +24,14 @@ license = {text = "MIT"}
 
 [project.optional-dependencies]
 watch = ["watchfiles"]
-all = ["auto-ddns[watch]"]
+all = ["dns-manager[watch]"]
 
 [project.scripts]
-auto-ddns = "auto_ddns.__main__:app"
+dns-manager = "dns_manager.__main__:app"
 
 [tool.pdm.version]
 source = "scm"
-write_to = "auto_ddns/__version__.py"
+write_to = "dns_manager/__version__.py"
 write_template = "__version__ = '{}'"
 
 [tool.pdm.dev-dependencies]
@@ -42,11 +42,11 @@ test = [
 ]
 
 [tool.pdm.build]
-includes = ["auto_ddns"]
+includes = ["dns_manager"]
 
 [tool.ruff]
 line-length = 120
-src = ["auto_ddns", "tests"]
+src = ["dns_manager", "tests"]
 target-version = "py311"
 
 [tool.ruff.lint]
@@ -66,7 +66,7 @@ select = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["auto_ddns"]
+known-first-party = ["dns_manager"]
 required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]

@@ -1,31 +1,31 @@
-# Auto-ddns
+# dns-manager
 
 一个可扩展的 DNS 管理工具。
 
-## 安装 [![Downloads](https://pepy.tech/badge/auto-ddns)](https://pepy.tech/project/auto-ddns)
+## 安装 [![Downloads](https://pepy.tech/badge/dns-manager)](https://pepy.tech/project/dns-manager)
 
 ### 使用 pip/pipx 安装
 
 在此之前请确保安装 `Python3.10` 及以上版本，并安装了 `pip`。
 ```shell
-pip install auto-ddns[all]
+pip install dns-manager[all]
 ```
 
 如果想要尝试 Nightly 版本，可尝试（需确保使用`Python3.12`）
 ```shell
-pip install git+https://github.com/zrr1999/auto-ddns@main
+pip install git+https://github.com/zrr1999/dns-manager@main
 ```
 
 在此之前请确保安装了 `pipx`。
 ```shell
-pipx install auto-ddns[all]
+pipx install dns-manager[all]
 ```
 
 ### 源码安装（需确保使用`Python3.12`）
 
 ```shell
-git clone https://github.com/zrr1999/auto-ddns
-cd auto-ddns
+git clone https://github.com/zrr1999/dns-manager
+cd dns-manager
 pip install .
 ```
 
@@ -44,7 +44,7 @@ pip install .
 ```
 然后执行以下命令：
 ```shell
-auto-ddns update --path ~/.config/auto-ddns/sdns.json
+dns-manager update --path ~/.config/dns-manager/sdns.json
 ```
 此时，你的解析记录就会增加一条 `test.mydomain.com` 的 CNAME 记录指向 `baidu.com` 。
 
@@ -55,7 +55,7 @@ auto-ddns update --path ~/.config/auto-ddns/sdns.json
 
 ## 如何贡献
 
-非常欢迎你的加入！[提一个 Issue](https://github.com/zrr1999/auto-ddns/issues/new) 或者提交一个 [Pull Request](https://github.com/zrr1999/auto-ddns/pulls/new)。
+非常欢迎你的加入！[提一个 Issue](https://github.com/zrr1999/dns-manager/issues/new) 或者提交一个 [Pull Request](https://github.com/zrr1999/dns-manager/pulls/new)。
 
 ### 贡献者
 
