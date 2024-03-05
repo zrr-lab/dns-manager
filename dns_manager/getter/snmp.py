@@ -36,7 +36,7 @@ class SnmpGetter(IPGetterBase):
         else:
             return pattern.parse_string(results.read())
 
-    def get_interface_ip(self, interface: str) -> str:
+    def get_ip(self) -> str:
         mapping_name_to_id = {
             interface_name: interface_id for interface_id, interface_name in self.walk("ifname", self.ifname_pattern)
         }
@@ -44,12 +44,4 @@ class SnmpGetter(IPGetterBase):
             interface_id: ip_address for ip_address, interface_id in self.walk(".1.3.6.1.2.1.4.20.1.2", self.ip_pattern)
         }
 
-        return mapping_id_to_ip[mapping_name_to_id[interface]]
-
-    def get_ip(self):
-        return self.get_interface_ip(self.interface)
-
-
-def get_interface_ip(interface: str, *, host: str = "192.168.1.1", group: str = "public") -> str:
-    walker = SnmpGetter(group, host, interface)
-    return walker.get_ip()
+        return mapping_id_to_ip[mapping_name_to_id[self.interface]]
