@@ -26,6 +26,10 @@ license = {text = "MIT"}
 watch = ["watchfiles"]
 all = ["dns-manager[watch]"]
 
+[project.urls]
+Homepage = "https://pypi.org/project/dns-manager"
+Repository = "https://github.com/zrr1999/dns-manager.git"
+
 [project.scripts]
 dns-manager = "dns_manager.__main__:app"
 dnsm = "dns_manager.__main__:app"
