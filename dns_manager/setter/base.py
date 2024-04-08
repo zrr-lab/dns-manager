@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from abc import abstractmethod
 from enum import Enum
+from pathlib import Path
 
 from loguru import logger
 
@@ -32,27 +33,26 @@ class RecordStatus(Enum):
 
 class DNSSetterBase:
     def __init__(self, config: dict):
-        self.records_cache: dict[str, Record] = {}
+        self.cached_records: dict[str, Record] = {}
         self.update_config(Config.model_validate(config))
-        self.init_records_cache()
+        self.fetch()
 
     def update_config(self, config: Config):
         self.domain = config.domain
-        records: list[tuple[str, str]] = []
+        self.record_config: list[tuple[str, str]] = []
         for name, value in config.records:
             if value == "unknown" or value is None:
                 value = self.domain
             if isinstance(name, str):
-                records.append((name, value))
+                self.record_config.append((name, value))
             else:
-                records.extend([(subdomain, value) for subdomain in name])
-        self.record_config = records
+                self.record_config.extend([(subdomain, value) for subdomain in name])
 
     async def update_config_async(self, config: Config):
         self.update_config(config)
         await asyncio.sleep(0)
 
-    def get_records(self) -> dict[str, Record]:
+    def generate_records(self) -> dict[str, Record]:
         from ..utils import generate_record
 
         records: dict[str, Record] = {}
@@ -61,25 +61,41 @@ class DNSSetterBase:
         return records
 
     def update_dns(self):
-        new_records = self.get_records()
+        from ..utils import save_config
+
+        new_records = self.generate_records()
+        unmanaged_records = set(self.cached_records.keys()) - set(new_records.keys())
+        if len(unmanaged_records) > 0:
+            records = []
+            for subdomain in unmanaged_records:
+                record = self.cached_records[subdomain]
+                records.append((subdomain, record.value))
+                logger.warning(f"([red]🔓 Unmanaged[/]) {record}")
+            save_config(
+                Path("~/.config/dns-manager/unmanaged.json"),
+                Config(
+                    domain=self.domain,
+                    records=records,
+                ).model_dump(),
+            )
+            logger.info("Unmanaged records saved to [bold purple]~/.config/dns-manager/unmanaged.json[/].")
         for subdomain, record in new_records.items():
-            arrow = "[bold blue]➡️[/]"
-            record_cache = self.records_cache.get(subdomain, None)
-            if record_cache is None:
+            cached_record = self.cached_records.get(subdomain, None)
+            if cached_record is None:
                 status = self.create_record(record)
-            elif record != record_cache:
-                status = self.modify_record(self.get_record_id(record_cache), record)
+            elif record != cached_record:
+                status = self.modify_record(self.get_record_id(cached_record), record)
             else:
                 status = RecordStatus.EXISTS
 
             if status in (RecordStatus.CREATED, RecordStatus.MODIFIED):
-                self.records_cache[subdomain] = record
-            logger.info(f"({status}) [bold blue]{record.type}[/]: {subdomain} {arrow} {record.value}")
+                self.cached_records[subdomain] = record
+            logger.info(f"({status}) {record}")
 
         # TODO: delete records which are not in new_records
 
     @abstractmethod
-    def init_records_cache(self) -> None:
+    def fetch(self) -> None:
         pass
 
     @abstractmethod
@@ -96,4 +112,8 @@ class DNSSetterBase:
 
     @abstractmethod
     def modify_record(self, record_id: str, record: Record) -> RecordStatus:
+        pass
+
+    @abstractmethod
+    def list_records(self) -> list[Record]:
         pass

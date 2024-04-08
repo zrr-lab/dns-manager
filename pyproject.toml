@@ -27,7 +27,7 @@ watch = ["watchfiles"]
 all = ["dns-manager[watch]"]
 
 [project.urls]
-Homepage = "https://pypi.org/project/dns-manager"
+Homepage = "https://github.com/zrr1999/dns-manager.git"
 Repository = "https://github.com/zrr1999/dns-manager.git"
 
 [project.scripts]

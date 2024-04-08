@@ -25,7 +25,11 @@ def init_logger(log_level: str):
 
 
 @app.command()
-def update(path: Path = Path("~/.config/dns-manager/ddns.json"), setter: str = "dnspod", log_level: str = "INFO"):
+def update(
+    path: Path,
+    setter: str = "dnspod",
+    log_level: str = "INFO",
+):
     init_logger(log_level)
     logger.info(f"Loading dns config from [bold purple]{path}[/].")
     config = load_config(path)
@@ -34,7 +38,11 @@ def update(path: Path = Path("~/.config/dns-manager/ddns.json"), setter: str = "
 
 
 @app.command()
-def watch(path: Path = Path("~/.config/dns-manager/ddns.json"), setter: str = "dnspod", log_level: str = "INFO"):
+def watch(
+    path: Path,
+    setter: str = "dnspod",
+    log_level: str = "INFO",
+):
     init_logger(log_level)
     path = path.expanduser()
     asyncio.run(watch_async(path, setter))
@@ -47,7 +55,10 @@ async def watch_async(path: Path, setter: str):
     config = load_config(path)
     setter_obj = create_setter_by_str(config, setter)
     interval = int(config.get("interval", 300))
-    progress = Progress(TextColumn("{task.description}: [bold blue]{task.completed}s/{task.total}s[/]"), transient=True)
+    progress = Progress(
+        TextColumn("{task.description}: [bold blue]{task.completed}s/{task.total}s[/]"),
+        transient=True,
+    )
     countdown = progress.add_task("Update Timer", total=interval)
 
     async def watch_config():

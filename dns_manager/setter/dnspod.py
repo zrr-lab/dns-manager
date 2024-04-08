@@ -21,20 +21,22 @@ class DNSPodSetter(DNSSetterBase):
         if token is not None:
             logger.info(f"Secret not found in env, load using token: {token.name}")
             envs = {env.name: env.value for env in token.envs}
-            secret_id = envs.get("TENCENTCLOUD_SECRET_ID", None)
-            secret_key = envs.get("TENCENTCLOUD_SECRET_KEY", None)
+            secret_id = envs.get("TENCENTCLOUD_SECRET_ID")
+            secret_key = envs.get("TENCENTCLOUD_SECRET_KEY")
         else:
             secret_id = os.environ.get("TENCENTCLOUD_SECRET_ID", None)
             secret_key = os.environ.get("TENCENTCLOUD_SECRET_KEY", None)
 
         cred = credential.Credential(secret_id, secret_key)
         self.client = dnspod_client.DnspodClient(cred, "")
+        self.mapping_record_to_id: dict[Record, str] = {}
         super().__init__(config)
 
-    def init_records_cache(self) -> None:
-        self.records_cache = {k.subdomain: k for k in self.mapping_record_to_id}
+    def fetch(self) -> None:
+        self.list_records()
+        self.cached_records = {k.subdomain: k for k in self.mapping_record_to_id}
 
-    def list_record(self) -> list[models.RecordListItem]:
+    def list_records(self) -> list[Record]:
         try:
             req = models.DescribeRecordListRequest()
             params = {"Domain": self.domain}
@@ -43,28 +45,26 @@ class DNSPodSetter(DNSSetterBase):
             resp = self.client.DescribeRecordList(req)
             logger.debug(resp.to_json_string())
             assert isinstance(resp.RecordList, list)
-            return resp.RecordList
+            json_record_list: list[dict[str, str]] = [json.loads(r.to_json_string()) for r in resp.RecordList]
+            output_record_list = []
+            for json_record in json_record_list:
+                record = Record(
+                    subdomain=json_record["Name"],
+                    type=json_record["Type"],
+                    value=json_record["Value"],
+                )
+                output_record_list.append(record)
+
+                self.mapping_record_to_id[record] = json_record["RecordId"]
+            return output_record_list
 
         except TencentCloudSDKException as err:
             logger.exception(err)
             return []
 
     @property
-    def mapping_record_to_id(self) -> dict[Record, str]:
-        _mapping_record_to_id = {}
-        remote_records = self.list_record()
-        for remote_record in remote_records:
-            match json.loads(remote_record.to_json_string()):
-                case {"RecordId": RecordId, "Name": Name, "Type": Type, "Value": Value, **kwargs}:
-                    _mapping_record_to_id[
-                        Record(
-                            subdomain=Name,
-                            value=Value,
-                            type=Type,
-                        )
-                    ] = RecordId
-                    logger.debug(f"Type: {Type}, Name: {Name}, {kwargs}")
-        return _mapping_record_to_id
+    def remote_records(self):
+        return self.list_records()
 
     @cached(cache=TTLCache(maxsize=10, ttl=300))
     def get_record_id(self, record: Record) -> str:

@@ -73,3 +73,22 @@ def load_config(path: Path) -> dict:
         else:
             raise NotImplementedError(f"Unsupportted suffix {path.suffix}")
     return config
+
+
+def save_config(path: Path, config: dict) -> None:
+    path = path.expanduser()
+    with open(path, "w") as f:
+        if path.suffix == ".json":
+            import json
+
+            json.dump(config, f, indent=2)
+        elif path.suffix == ".toml":
+            import toml
+
+            toml.dump(config, f)
+        elif path.suffix == ".yaml":
+            import yaml
+
+            yaml.dump(config, f)
+        else:
+            raise NotImplementedError(f"Unsupportted suffix {path.suffix}")

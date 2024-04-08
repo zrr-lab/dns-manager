@@ -13,3 +13,6 @@ class Record(BaseModel):
 
     def __eq__(self, other: Record) -> bool:
         return self.subdomain == other.subdomain and self.value == other.value and self.type == other.type
+
+    def __str__(self) -> str:
+        return f"[bold blue]{self.type}[/]: {self.subdomain} [bold blue]➡️[/] {self.value}"
