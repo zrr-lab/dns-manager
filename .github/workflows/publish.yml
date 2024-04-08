@@ -38,7 +38,6 @@ jobs:
         path: dist
 
   publish:
-    name: Upload to PyPI
     runs-on: ubuntu-latest
     needs: [build]
     permissions:
@@ -57,7 +56,6 @@ jobs:
           verbose: true
 
   release:
-    name: Upload to PyPI
     runs-on: ubuntu-latest
     needs: [build]
     permissions:
@@ -75,4 +73,4 @@ jobs:
         with:
           name: dns-manager ${{github.ref_name}}
           files: |
-            dist
+            dist/*.whl
