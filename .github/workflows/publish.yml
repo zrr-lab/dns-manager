@@ -37,7 +37,7 @@ jobs:
         name: wheels
         path: dist
 
-  publish-release:
+  publish:
     name: Upload to PyPI
     runs-on: ubuntu-latest
     needs: [build]
@@ -55,7 +55,24 @@ jobs:
           skip-existing: true
           packages-dir: dist
           verbose: true
+
+  release:
+    name: Upload to PyPI
+    runs-on: ubuntu-latest
+    needs: [build]
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout 📦
+        uses: actions/checkout@v4
+      - name: Download wheels 👷‍♂️
+        uses: actions/download-artifact@v3
+        with:
+          name: wheels
+          path: dist
       - name: Publish GitHub Release 📝
         uses: softprops/action-gh-release@v1
         with:
           name: dns-manager ${{github.ref_name}}
+          files: |
+            dist
