@@ -45,7 +45,9 @@ class DNSPodSetter(DNSSetterBase):
             resp = self.client.DescribeRecordList(req)
             logger.debug(resp.to_json_string())
             assert isinstance(resp.RecordList, list)
-            json_record_list: list[dict[str, str]] = [json.loads(r.to_json_string()) for r in resp.RecordList]
+            json_record_list: list[dict[str, str]] = [
+                json.loads(r.to_json_string()) for r in resp.RecordList
+            ]
             output_record_list = []
             for json_record in json_record_list:
                 record = Record(

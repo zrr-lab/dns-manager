@@ -78,7 +78,9 @@ class DNSSetterBase:
                     records=records,
                 ).model_dump(),
             )
-            logger.info("Unmanaged records saved to [bold purple]~/.config/dns-manager/unmanaged.json[/].")
+            logger.info(
+                "Unmanaged records saved to [bold purple]~/.config/dns-manager/unmanaged.json[/]."
+            )
         for subdomain, record in new_records.items():
             cached_record = self.cached_records.get(subdomain, None)
             if cached_record is None:

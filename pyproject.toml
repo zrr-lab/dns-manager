@@ -50,7 +50,7 @@ test = [
 includes = ["dns_manager"]
 
 [tool.ruff]
-line-length = 120
+line-length = 100
 src = ["dns_manager", "tests"]
 target-version = "py311"
 

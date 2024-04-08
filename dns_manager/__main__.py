@@ -19,7 +19,9 @@ app = typer.Typer()
 
 
 def init_logger(log_level: str):
-    handler = RichHandler(console=Console(style=Style()), highlighter=NullHighlighter(), markup=True)
+    handler = RichHandler(
+        console=Console(style=Style()), highlighter=NullHighlighter(), markup=True
+    )
     logger.remove()
     logger.add(handler, format="{message}", level=log_level)
 
@@ -66,7 +68,9 @@ async def watch_async(path: Path, setter: str):
             with open(path) as f:
                 config = json.load(f)
             await setter_obj.update_config_async(config)
-            progress.update(countdown, completed=interval, description="Update Timer([bold]Reloading Config[/])")
+            progress.update(
+                countdown, completed=interval, description="Update Timer([bold]Reloading Config[/])"
+            )
 
     async def update_dns():
         while True:
