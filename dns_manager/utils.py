@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 from auto_token import get_config, get_token
+from loguru import logger
 
 from .getter import PublicGetter, SnmpGetter
 from .model import Record
@@ -31,6 +32,9 @@ def create_getter_by_str(config: dict, dns_setter: str = "dnspod"):
 
 
 def generate_record(name: str, value: str) -> Record:
+    if value.startswith("http"):
+        record_type = "显性URL"
+        return Record(subdomain=name, value=value, type=record_type)
     if ":" not in value:
         if re.match("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", value):
             record_type = "A"
@@ -55,6 +59,8 @@ def generate_record(name: str, value: str) -> Record:
 
 
 def load_config(path: Path) -> dict:
+    if not path.exists():
+        raise FileNotFoundError(f"Config file {path} not found")
     path = path.expanduser()
     with open(path.expanduser()) as f:
         if path.suffix == ".json":
@@ -72,6 +78,22 @@ def load_config(path: Path) -> dict:
             config = yaml.load(f, Loader=FullLoader)
         else:
             raise NotImplementedError(f"Unsupportted suffix {path.suffix}")
+    if "domain" not in config:
+        raise ValueError("Config must contain domain")
+    if "records" not in config:
+        config["records"] = []
+    if "ignore" not in config:
+        config["ignore"] = []
+    if "records_files" in config:
+        records_files: list[str] = config["records_files"]
+        for records_file in records_files:
+            sub_path = path.parent / records_file
+            try:
+                load_config(sub_path)
+            except FileNotFoundError:
+                logger.warning(f"Records file {sub_path} not found")
+            config["records"].extend(load_config(sub_path)["records"])
+            config["ignore"].extend(load_config(sub_path)["ignore"])
     return config
 
 

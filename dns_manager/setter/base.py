@@ -38,9 +38,11 @@ class DNSSetterBase:
         self.fetch()
 
     def update_config(self, config: Config):
-        self.domain = config.domain
+        self.config = config
+        self.domain = self.config.domain
         self.record_config: list[tuple[str, str]] = []
-        for name, value in config.records:
+        self.ignored_records = set(self.config.ignore or [])
+        for name, value in self.config.records:
             if value == "unknown" or value is None:
                 value = self.domain
             if isinstance(name, str):
@@ -60,27 +62,37 @@ class DNSSetterBase:
             records[subdomain] = generate_record(subdomain, value)
         return records
 
-    def update_dns(self):
+    def update_dns(self, remove_unmanaged: bool = False):
         from ..utils import save_config
 
         new_records = self.generate_records()
-        unmanaged_records = set(self.cached_records.keys()) - set(new_records.keys())
+        unmanaged_records = (
+            set(self.cached_records.keys()) - set(new_records.keys()) - self.ignored_records
+        )
         if len(unmanaged_records) > 0:
-            records = []
-            for subdomain in unmanaged_records:
-                record = self.cached_records[subdomain]
-                records.append((subdomain, record.value))
-                logger.warning(f"([red]🔓 Unmanaged[/]) {record}")
-            save_config(
-                Path("~/.config/dns-manager/unmanaged.json"),
-                Config(
-                    domain=self.domain,
-                    records=records,
-                ).model_dump(),
-            )
-            logger.info(
-                "Unmanaged records saved to [bold purple]~/.config/dns-manager/unmanaged.json[/]."
-            )
+            if remove_unmanaged:
+                for subdomain in unmanaged_records:
+                    record = self.cached_records[subdomain]
+                    record_id = self.get_record_id(record)
+                    status = self.delete_record(record_id)
+                    if status == RecordStatus.DELETED:
+                        del self.cached_records[subdomain]
+                    logger.info(f"({status}) {record}")
+            else:
+                records = []
+                for subdomain in unmanaged_records:
+                    record = self.cached_records[subdomain]
+                    records.append((subdomain, record.value))
+                    logger.warning(f"([red]🔓 Unmanaged[/]) {record}")
+                path = Path("~/.config/dns-manager/unmanaged.json")
+                save_config(
+                    path,
+                    Config(
+                        domain=self.domain,
+                        records=records,
+                    ).model_dump(),
+                )
+                logger.info(f"Unmanaged records saved to [bold purple]{path}[/].")
         for subdomain, record in new_records.items():
             cached_record = self.cached_records.get(subdomain, None)
             if cached_record is None:

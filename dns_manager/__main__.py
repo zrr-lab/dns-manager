@@ -30,13 +30,14 @@ def init_logger(log_level: str):
 def update(
     path: Path,
     setter: str = "dnspod",
+    remove_unmanaged: bool = False,
     log_level: str = "INFO",
 ):
     init_logger(log_level)
     logger.info(f"Loading dns config from [bold purple]{path}[/].")
     config = load_config(path)
     setter_obj = create_setter_by_str(config, setter)
-    setter_obj.update_dns()
+    setter_obj.update_dns(remove_unmanaged=remove_unmanaged)
 
 
 @app.command()
