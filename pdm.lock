@@ -5,7 +5,7 @@
 groups = ["default", "test"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:f897cc34e7b64933cd729eb7aeb3e652c5946fa5eba6dd927320ed46986eb22c"
+content_hash = "sha256:8f8e8592ac368ed428dcf0e9ca5814e791da75b620314505d8795e7aa66e585a"
 
 [[package]]
 name = "annotated-types"
@@ -35,7 +35,7 @@ files = [
 
 [[package]]
 name = "auto-token"
-version = "0.0.5"
+version = "0.0.6"
 requires_python = ">=3.9"
 summary = "auto manage token"
 dependencies = [
@@ -47,7 +47,7 @@ dependencies = [
     "typer[all]>=0.9.0",
 ]
 files = [
-    {file = "auto_token-0.0.5-py3-none-any.whl", hash = "sha256:79f8bd53dbdfb33fc00b668af491a0e637739b3f5af5e380ca21864530af783a"},
+    {file = "auto_token-0.0.6-py3-none-any.whl", hash = "sha256:2ea1a255cdf2c014c912354f1a687d074c545505eaf6daf6b9b686b27e1bdd17"},
 ]
 
 [[package]]
