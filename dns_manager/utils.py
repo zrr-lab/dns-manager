@@ -23,7 +23,12 @@ def create_setter_by_str(config: dict, dns_setter: str = "dnspod"):
     >>> assert isinstance(setter, DNSPodSetter)
 
     """
-    token = get_token("dnspod", get_token_config(), create=True)
+    token = get_token(
+        "dnspod",
+        get_token_config(),
+        create=True,
+        env_names=["TENCENTCLOUD_SECRET_ID", "TENCENTCLOUD_SECRET_KEY"],
+    )
     match dns_setter:
         case "dnspod":
             setter = DNSPodSetter(config, token)
