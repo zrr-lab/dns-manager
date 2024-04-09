@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 from pathlib import Path
 
 import typer
@@ -19,6 +20,7 @@ app = typer.Typer()
 
 
 def init_logger(log_level: str):
+    log_level = os.environ.get("LOG_LEVEL", log_level)
     handler = RichHandler(
         console=Console(style=Style()), highlighter=NullHighlighter(), markup=True
     )
