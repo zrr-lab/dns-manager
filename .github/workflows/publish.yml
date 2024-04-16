@@ -69,7 +69,7 @@ jobs:
           name: wheels
           path: dist
       - name: Publish GitHub Release 📝
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: dns-manager ${{github.ref_name}}
           files: |
