@@ -6,7 +6,7 @@ from pydantic import BaseModel
 class Record(BaseModel):
     subdomain: str
     value: str
-    type: str | None = None
+    type: str
 
     def __hash__(self) -> int:
         return hash(self.subdomain)

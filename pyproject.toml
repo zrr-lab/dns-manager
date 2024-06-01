@@ -2,25 +2,23 @@
 name = "dns-manager"
 dynamic = ["version"]
 description = "Manage your DNS records with ease."
-authors = [
-    {name = "Zhan Rongrui", email = "2742392377@qq.com"},
-]
+authors = [{ name = "Zhan Rongrui", email = "2742392377@qq.com" }]
 dependencies = [
-    "tencentcloud-sdk-python-dnspod",
+    "tencentcloud-sdk-python-dnspod", # deprecated
     "loguru>=0.7.2",
     "rich>=13.7.0",
     "pyparsing>=3.1.1",
     "typer[all]>=0.9.0",
     "cachetools>=5.3.2",
     "pydantic>=2.5.3",
-    "auto-token>=0.0.6",
     "PyYaml>=6.0.1",
     "toml>=0.10.2",
     "httpx>=0.26.0",
+    "dns-lexicon>=3.17.0",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 
 [project.optional-dependencies]
 watch = ["watchfiles"]
@@ -40,12 +38,7 @@ write_to = "dns_manager/__version__.py"
 write_template = "__version__ = '{}'"
 
 [tool.pdm.dev-dependencies]
-test = [
-    "xdoctest",
-    "pytest",
-    "pytest-cov",
-    "coverage",
-]
+test = ["xdoctest", "pytest", "pytest-cov", "coverage"]
 
 [tool.pdm.build]
 includes = ["dns_manager"]
@@ -57,18 +50,18 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = [
-  "F",
-  "SIM",
-  "UP",
-  "FA",   # flake8-annotations
-  "I",    # isort
-  "B",    # flake8-bugbear
-  "C4",   # flake8-comprehensions
-  "PGH",  # pygrep-hooks
-  "RUF",  # ruff
-  "E",    # pycodestyle
-  "W",    # pycodestyle
-  "YTT",  # flake8-2020
+    "F",
+    "SIM",
+    "UP",
+    "FA",  # flake8-annotations
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "PGH", # pygrep-hooks
+    "RUF", # ruff
+    "E",   # pycodestyle
+    "W",   # pycodestyle
+    "YTT", # flake8-2020
 ]
 
 [tool.ruff.lint.isort]

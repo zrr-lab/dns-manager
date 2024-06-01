@@ -2,49 +2,36 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Any
 
-from auto_token import get_config as get_token_config
-from auto_token import get_token
 from loguru import logger
 
 from .getter import PublicGetter, SnmpGetter
 from .model import Record
-from .setter import DNSPodSetter
+from .setter import DNSPodSetter, LexiconSetter
 
 
-def create_setter_by_str(config: dict, dns_setter: str = "dnspod"):
+def create_setter_by_config(config: dict):
     """
     Create a DNS setter by string.
 
     Example:
     >>> logger.remove()
-    >>> config = {"domain": "bone6.top", "records": []}
-    >>> setter = create_setter_by_str(config, "dnspod")
+    >>> config = {"domain": "bone6.top", "setter_name": "dnspod", "records": []}
+    >>> setter = create_setter_by_config(config)
     >>> assert isinstance(setter, DNSPodSetter)
+    >>> config = {"domain": "bone6.top", "setter_name": "cloudflare", "records": []}
+    >>> setter = create_setter_by_config(config)
+    >>> assert isinstance(setter, LexiconSetter)
 
     """
-    token = get_token(
-        "dnspod",
-        get_token_config(),
-        create=True,
-        env_names=["TENCENTCLOUD_SECRET_ID", "TENCENTCLOUD_SECRET_KEY"],
-    )
-    match dns_setter:
+    setter_name = config["setter_name"]
+    match setter_name:
         case "dnspod":
-            setter = DNSPodSetter(config, token)
+            setter = DNSPodSetter(config)
         case _:
-            raise NotImplementedError("Only dnspod is supported now")
+            setter = LexiconSetter(config)
     return setter
-
-
-def create_getter_by_str(config: dict, dns_setter: str = "dnspod"):
-    # match dns_setter:
-    #     case "dnspod":
-    #         setter = DNSPodSetter(config)
-    #     case _:
-    #         raise NotImplementedError("Only dnspod is supported now")
-    # return setter
-    pass
 
 
 def generate_record(name: str, value: str) -> Record:
@@ -52,11 +39,7 @@ def generate_record(name: str, value: str) -> Record:
         record_type = "显性URL"
         return Record(subdomain=name, value=value, type=record_type)
     if ":" not in value:
-        if re.match("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", value):
-            record_type = "A"
-        else:
-            record_type = "CNAME"
-            value = value if value.endswith(".") else f"{value}."
+        record_type = "A" if re.match("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", value) else "CNAME"
         return Record(subdomain=name, value=value, type=record_type)
 
     match value.split(":"):
@@ -74,11 +57,11 @@ def generate_record(name: str, value: str) -> Record:
     return Record(subdomain=name, value=getter.get_ip(), type=record_type)
 
 
-def load_config(path: Path) -> dict:
+def load_dict_from_path(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(f"Config file {path} not found")
     path = path.expanduser()
-    with open(path.expanduser()) as f:
+    with open(path) as f:
         if path.suffix == ".json":
             import json
 
@@ -94,23 +77,36 @@ def load_config(path: Path) -> dict:
             config = yaml.load(f, Loader=FullLoader)
         else:
             raise NotImplementedError(f"Unsupportted suffix {path.suffix}")
-    if "domain" not in config:
-        raise ValueError("Config must contain domain")
-    if "records" not in config:
-        config["records"] = []
-    if "ignore" not in config:
-        config["ignore"] = []
-    if "records_files" in config:
-        records_files: list[str] = config["records_files"]
-        for records_file in records_files:
-            sub_path = path.parent / records_file
-            try:
-                load_config(sub_path)
-            except FileNotFoundError:
-                logger.warning(f"Records file {sub_path} not found")
-            config["records"].extend(load_config(sub_path)["records"])
-            config["ignore"].extend(load_config(sub_path)["ignore"])
+
     return config
+
+
+def load_config_from_path(path: Path) -> list[dict[str, Any]]:
+    origin_configs = load_dict_from_path(path)
+
+    configs: list[dict[str, Any]] = []
+    for domain_config in origin_configs.values():
+        assert "domain" in domain_config, f"Config must contain `domain`, config: {domain_config}"
+        assert (
+            "setter_name" in domain_config
+        ), f"Config must contain `setter_name`, config: {domain_config}"
+
+        if "records" not in domain_config:
+            domain_config["records"] = []
+        if "ignore" not in domain_config:
+            domain_config["ignore"] = []
+        if "records_files" in domain_config:
+            records_files: list[str] = domain_config["records_files"]
+            for records_file in records_files:
+                sub_path = path.parent / records_file
+                try:
+                    sub_config = load_dict_from_path(sub_path)
+                    domain_config["records"].extend(sub_config.get("records", []))
+                    domain_config["ignore"].extend(sub_config.get("ignore", []))
+                except FileNotFoundError:
+                    logger.warning(f"Records file {sub_path} not found")
+        configs.append(domain_config)
+    return configs
 
 
 def save_config(path: Path, config: dict) -> None:

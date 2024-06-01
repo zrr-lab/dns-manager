@@ -34,12 +34,14 @@ class RecordStatus(Enum):
 class DNSSetterBase:
     def __init__(self, config: dict):
         self.cached_records: dict[str, Record] = {}
+        self.mapping_record_to_id: dict[Record, str] = {}
         self.update_config(Config.model_validate(config))
         self.fetch()
 
     def update_config(self, config: Config):
         self.config = config
         self.domain = self.config.domain
+        self.setter_name = self.config.setter_name
         self.record_config: list[tuple[str, str]] = []
         self.ignored_records = set(self.config.ignore or [])
         for name, value in self.config.records:
@@ -59,7 +61,9 @@ class DNSSetterBase:
 
         records: dict[str, Record] = {}
         for subdomain, value in self.record_config:
-            records[subdomain] = generate_record(subdomain, value)
+            record = self.preprocess_record(generate_record(subdomain, value))
+            subdomain = record.subdomain
+            records[subdomain] = record
         return records
 
     def update_dns(self, remove_unmanaged: bool = False):
@@ -89,6 +93,7 @@ class DNSSetterBase:
                     path,
                     Config(
                         domain=self.domain,
+                        setter_name=self.setter_name,
                         records=records,
                     ).model_dump(),
                 )
@@ -107,6 +112,10 @@ class DNSSetterBase:
             logger.info(f"({status}) {record}")
 
         # TODO: delete records which are not in new_records
+
+    @abstractmethod
+    def preprocess_record(self, record: Record) -> Record:
+        pass
 
     @abstractmethod
     def fetch(self) -> None:

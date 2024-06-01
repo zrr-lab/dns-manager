@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 
-from auto_token.model import Token
 from cachetools import TTLCache, cached
 from loguru import logger
 from tencentcloud.common import credential
@@ -17,20 +16,20 @@ from .base import DNSSetterBase, RecordStatus
 
 
 class DNSPodSetter(DNSSetterBase):
-    def __init__(self, config: dict, token: Token | None = None) -> None:
-        if token is not None:
-            logger.info(f"Secret not found in env, load using token: {token.name}")
-            envs = {env.name: env.value for env in token.envs}
-            secret_id = envs.get("TENCENTCLOUD_SECRET_ID")
-            secret_key = envs.get("TENCENTCLOUD_SECRET_KEY")
-        else:
-            secret_id = os.environ.get("TENCENTCLOUD_SECRET_ID", None)
-            secret_key = os.environ.get("TENCENTCLOUD_SECRET_KEY", None)
-
+    def __init__(self, config: dict) -> None:
+        secret_id = os.environ.get("TENCENTCLOUD_SECRET_ID", None)
+        secret_key = os.environ.get("TENCENTCLOUD_SECRET_KEY", None)
         cred = credential.Credential(secret_id, secret_key)
         self.client = dnspod_client.DnspodClient(cred, "")
-        self.mapping_record_to_id: dict[Record, str] = {}
         super().__init__(config)
+
+    def preprocess_record(self, record: Record) -> Record:
+        subdomain, rtype, value = record.subdomain, record.type, record.value
+        subdomain = subdomain.removesuffix(f".{self.domain}")
+        if rtype == "显性URL":
+            rtype = "显性URL"
+        value = value.removesuffix(".")
+        return Record(subdomain=subdomain, type=rtype, value=value)
 
     def fetch(self) -> None:
         self.list_records()
@@ -50,10 +49,12 @@ class DNSPodSetter(DNSSetterBase):
             ]
             output_record_list = []
             for json_record in json_record_list:
-                record = Record(
-                    subdomain=json_record["Name"],
-                    type=json_record["Type"],
-                    value=json_record["Value"],
+                record = self.preprocess_record(
+                    Record(
+                        subdomain=json_record["Name"],
+                        type=json_record["Type"],
+                        value=json_record["Value"],
+                    )
                 )
                 output_record_list.append(record)
 
@@ -73,13 +74,13 @@ class DNSPodSetter(DNSSetterBase):
         return self.mapping_record_to_id[record]
 
     def create_record(self, record: Record) -> RecordStatus:
-        sub_domain, value, record_type = record.subdomain, record.value, record.type
-        sub_domain = ".".join(sub_domain) if isinstance(sub_domain, list) else sub_domain
+        subdomain, value, record_type = record.subdomain, record.value, record.type
+        subdomain = ".".join(subdomain) if isinstance(subdomain, list) else subdomain
         try:
             req = models.CreateRecordRequest()
             params = {
                 "Domain": self.domain,
-                "SubDomain": sub_domain,
+                "SubDomain": subdomain,
                 "RecordType": record_type,
                 "RecordLine": "默认",
                 "Value": value,
@@ -112,14 +113,14 @@ class DNSPodSetter(DNSSetterBase):
             return RecordStatus.FAILED
 
     def modify_record(self, record_id: str, record: Record) -> RecordStatus:
-        sub_domain, value, record_type = record.subdomain, record.value, record.type
-        sub_domain = ".".join(sub_domain) if isinstance(sub_domain, list) else sub_domain
+        subdomain, value, record_type = record.subdomain, record.value, record.type
+        subdomain = ".".join(subdomain) if isinstance(subdomain, list) else subdomain
         try:
             req = models.ModifyRecordRequest()
             params = {
                 "RecordId": record_id,
                 "Domain": self.domain,
-                "SubDomain": sub_domain,
+                "SubDomain": subdomain,
                 "RecordType": record_type,
                 "RecordLine": "默认",
                 "Value": value,
@@ -131,5 +132,5 @@ class DNSPodSetter(DNSSetterBase):
             return RecordStatus.MODIFIED
 
         except TencentCloudSDKException as err:
-            logger.warning(f"{sub_domain}: {err}")
+            logger.warning(f"{subdomain}: {err}")
             return RecordStatus.FAILED
