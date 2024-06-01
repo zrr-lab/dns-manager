@@ -91,42 +91,34 @@ class DNSPodSetter(DNSSetterBase):
         logger.debug(resp.to_json_string())
         return RecordStatus.CREATED
 
+    @catch_failed_exceptions(TencentCloudSDKException)
     def delete_record(self, record_id: str) -> RecordStatus:
-        try:
-            req = models.DeleteRecordRequest()
-            params = {
-                "RecordId": record_id,
-                "Domain": self.domain,
-            }
-            req.from_json_string(json.dumps(params))
+        req = models.DeleteRecordRequest()
+        params = {
+            "RecordId": record_id,
+            "Domain": self.domain,
+        }
+        req.from_json_string(json.dumps(params))
 
-            resp = self.client.DeleteRecord(req)
-            logger.debug(resp.to_json_string())
-            return RecordStatus.DELETED
+        resp = self.client.DeleteRecord(req)
+        logger.debug(resp.to_json_string())
+        return RecordStatus.DELETED
 
-        except TencentCloudSDKException as err:
-            logger.exception(err)
-            return RecordStatus.FAILED
-
+    @catch_failed_exceptions(TencentCloudSDKException)
     def modify_record(self, record_id: str, record: Record) -> RecordStatus:
         subdomain, value, record_type = record.subdomain, record.value, record.type
         subdomain = ".".join(subdomain) if isinstance(subdomain, list) else subdomain
-        try:
-            req = models.ModifyRecordRequest()
-            params = {
-                "RecordId": record_id,
-                "Domain": self.domain,
-                "SubDomain": subdomain,
-                "RecordType": record_type,
-                "RecordLine": "默认",
-                "Value": value,
-            }
-            req.from_json_string(json.dumps(params))
+        req = models.ModifyRecordRequest()
+        params = {
+            "RecordId": record_id,
+            "Domain": self.domain,
+            "SubDomain": subdomain,
+            "RecordType": record_type,
+            "RecordLine": "默认",
+            "Value": value,
+        }
+        req.from_json_string(json.dumps(params))
 
-            resp = self.client.ModifyRecord(req)
-            logger.debug(resp.to_json_string())
-            return RecordStatus.MODIFIED
-
-        except TencentCloudSDKException as err:
-            logger.warning(f"{subdomain}: {err}")
-            return RecordStatus.FAILED
+        resp = self.client.ModifyRecord(req)
+        logger.debug(resp.to_json_string())
+        return RecordStatus.MODIFIED
