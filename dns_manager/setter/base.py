@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import asyncio
 from abc import abstractmethod
+from collections.abc import Callable
 from enum import Enum
+from functools import wraps
 from pathlib import Path
 
 from loguru import logger
@@ -29,6 +31,21 @@ class RecordStatus(Enum):
                 return "[red]🔥 Deleted[/]"
             case "FAILED":
                 return "[red]❌ Failed[/]"
+
+
+def catch_failed_exceptions(*exceptions: type[BaseException]):
+    def decorator(func: Callable[..., RecordStatus]) -> Callable[..., RecordStatus]:
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except exceptions as e:
+                logger.error(f"Exception occurred in {func.__name__}: {e}")
+                return RecordStatus.FAILED
+
+        return wrapper
+
+    return decorator
 
 
 class DNSSetterBase:

@@ -38,23 +38,29 @@ def generate_record(name: str, value: str) -> Record:
     if value.startswith("http"):
         record_type = "显性URL"
         return Record(subdomain=name, value=value, type=record_type)
-    if ":" not in value:
-        record_type = "A" if re.match("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", value) else "CNAME"
-        return Record(subdomain=name, value=value, type=record_type)
 
     match value.split(":"):
+        case (value,) if re.match("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", value):
+            record_type = "A"
+            # TODO: to support ipv6
+        case (value,):
+            record_type = "CNAME"
         case ("snmp", interface_name):
             record_type = "A"
             host: str = "192.168.1.1"
             group: str = "public"
             # TODO: use config to get host and group
             getter = SnmpGetter(group, host, interface_name)
+            value = getter.get_ip()
         case ("public", url):
             record_type = "A"
             getter = PublicGetter(url)
+            value = getter.get_ip()
         case _:
-            raise NotImplementedError("Only snmp is supported now")
-    return Record(subdomain=name, value=getter.get_ip(), type=record_type)
+            logger.warning(f"Unsupportted value {value}, use TXT as default")
+            record_type = "TXT"
+
+    return Record(subdomain=name, value=value, type=record_type)
 
 
 def load_dict_from_path(path: Path) -> dict[str, Any]:

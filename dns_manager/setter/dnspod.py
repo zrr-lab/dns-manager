@@ -12,7 +12,7 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import (
 from tencentcloud.dnspod.v20210323 import dnspod_client, models
 
 from ..model import Record
-from .base import DNSSetterBase, RecordStatus
+from .base import DNSSetterBase, RecordStatus, catch_failed_exceptions
 
 
 class DNSPodSetter(DNSSetterBase):
@@ -73,27 +73,23 @@ class DNSPodSetter(DNSSetterBase):
     def get_record_id(self, record: Record) -> str:
         return self.mapping_record_to_id[record]
 
+    @catch_failed_exceptions(TencentCloudSDKException)
     def create_record(self, record: Record) -> RecordStatus:
         subdomain, value, record_type = record.subdomain, record.value, record.type
         subdomain = ".".join(subdomain) if isinstance(subdomain, list) else subdomain
-        try:
-            req = models.CreateRecordRequest()
-            params = {
-                "Domain": self.domain,
-                "SubDomain": subdomain,
-                "RecordType": record_type,
-                "RecordLine": "默认",
-                "Value": value,
-            }
-            req.from_json_string(json.dumps(params))
+        req = models.CreateRecordRequest()
+        params = {
+            "Domain": self.domain,
+            "SubDomain": subdomain,
+            "RecordType": record_type,
+            "RecordLine": "默认",
+            "Value": value,
+        }
+        req.from_json_string(json.dumps(params))
 
-            resp = self.client.CreateRecord(req)
-            logger.debug(resp.to_json_string())
-            return RecordStatus.CREATED
-
-        except TencentCloudSDKException as err:
-            logger.exception(err)
-            return RecordStatus.FAILED
+        resp = self.client.CreateRecord(req)
+        logger.debug(resp.to_json_string())
+        return RecordStatus.CREATED
 
     def delete_record(self, record_id: str) -> RecordStatus:
         try:
