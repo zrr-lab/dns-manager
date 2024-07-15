@@ -6,6 +6,7 @@ from collections.abc import Iterable
 from pyparsing import Combine, Group, OneOrMore, ParserElement, Suppress, Word, alphanums, nums
 
 from .base import IPGetterBase
+from .utils import get_default_gateway_ip
 
 
 class SnmpGetter(IPGetterBase):
@@ -26,9 +27,9 @@ class SnmpGetter(IPGetterBase):
         Group(mib_prefix + ip_address + equal_sign + integer_prefix + interface_id)
     )
 
-    def __init__(self, group: str, host: str, interface: str):
-        self.group = group
-        self.host = host
+    def __init__(self, interface: str):
+        self.group = "public"
+        self.host = get_default_gateway_ip()
 
         self.interface = interface
 

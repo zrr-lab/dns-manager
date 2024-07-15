@@ -47,10 +47,7 @@ def generate_record(name: str, value: str) -> Record:
             record_type = "CNAME"
         case ("snmp", interface_name):
             record_type = "A"
-            host: str = "192.168.1.1"
-            group: str = "public"
-            # TODO: use config to get host and group
-            getter = SnmpGetter(group, host, interface_name)
+            getter = SnmpGetter(interface_name)
             value = getter.get_ip()
         case ("public", url):
             record_type = "A"

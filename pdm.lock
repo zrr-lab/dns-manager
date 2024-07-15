@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "test"]
 strategy = ["cross_platform"]
-lock_version = "4.4.1"
-content_hash = "sha256:efb99254dfb5a1e4156fc35fe235e8342cf01b02cf4ee073b3c61df47cfa6a23"
+lock_version = "4.4.2"
+content_hash = "sha256:a6c07d4c7212d7ae71e0542a025cc2f8f79b0ac54418021e4abf2c8112223cdb"
 
 [[package]]
 name = "annotated-types"
@@ -743,6 +743,15 @@ dependencies = [
 files = [
     {file = "rich-13.7.1-py3-none-any.whl", hash = "sha256:4edbae314f59eb482f54e9e30bf00d33350aaa94f4bfcd4e9e3110e64d0d7222"},
     {file = "rich-13.7.1.tar.gz", hash = "sha256:9be308cb1fe2f1f57d67ce99e95af38a1e2bc71ad9813b0e247cf7ffbcc3a432"},
+]
+
+[[package]]
+name = "scapy"
+version = "2.5.0"
+requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4"
+summary = "Scapy: interactive packet manipulation tool"
+files = [
+    {file = "scapy-2.5.0.tar.gz", hash = "sha256:5b260c2b754fd8d409ba83ee7aee294ecdbb2c235f9f78fe90bc11cb6e5debc2"},
 ]
 
 [[package]]

@@ -15,6 +15,7 @@ dependencies = [
     "toml>=0.10.2",
     "httpx>=0.26.0",
     "dns-lexicon>=3.17.0",
+    "scapy>=2.5.0",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
