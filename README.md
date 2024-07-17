@@ -4,9 +4,9 @@
 
 ## 安装 [![Downloads](https://pepy.tech/badge/dns-manager)](https://pepy.tech/project/dns-manager)
 
-### 使用 pip/pipx 安装
+### 使用 pip/pipx/uv 安装
 
-在此之前请确保安装 `Python3.10` 及以上版本，并安装了 `pip`。
+在此之前请确保安装 Python3.10 及以上版本，并安装了 pip。
 ```shell
 pip install dns-manager[all]
 ```
@@ -16,10 +16,14 @@ pip install dns-manager[all]
 pip install git+https://github.com/zrr1999/dns-manager@main
 ```
 
-在此之前请确保安装了 `pipx`。
+在此之前请确保安装了 [pipx](https://github.com/pypa/pipx)/[uv](https://github.com/astral-sh/uv)。
 ```shell
 pipx install dns-manager[all]
+uv tool install dns-manager[all]
 ```
+
+pipx/uv 会类似 Homebrew 无感地为 yutto 创建一个虚拟环境，与其余环境隔离开，避免污染 pip 的环境，
+因此相对于 pip，pipx/uv 是更推荐的安装方式（uv 会比 pipx 更快些～）。
 
 ### 源码安装（需确保使用`Python3.12`）
 
@@ -48,6 +52,18 @@ dns-manager update --path ~/.config/dns-manager/sdns.json
 ```
 此时，你的解析记录就会增加一条 `test.mydomain.com` 的 CNAME 记录指向 `baidu.com` 。
 
+### 定时执行
+你可以使用 [cronie](https://github.com/cronie-crond/cronie) 定时执行，例如
+```
+@reboot dnsm update ~/.config/dns-manager/config.toml
+@hourly dnsm update ~/.config/dns-manager/config.toml
+```
+
+你可以通过下面的命令添加定时任务
+```shell
+(crontab -l 2>/dev/null; echo "@reboot dnsm update ~/.config/dns-manager/config.toml") | crontab
+(crontab -l 2>/dev/null; echo "@hourly dnsm update ~/.config/dns-manager/config.toml") | crontab
+```
 
 ## 维护者
 
