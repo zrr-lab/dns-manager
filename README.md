@@ -48,7 +48,8 @@ pip install .
 ```
 然后执行以下命令：
 ```shell
-dns-manager update --path ~/.config/dns-manager/sdns.json
+dns-manager update ~/.config/dns-manager/sdns.json
+# dnsm update ~/.config/dns-manager/sdns.json
 ```
 此时，你的解析记录就会增加一条 `test.mydomain.com` 的 CNAME 记录指向 `baidu.com` 。
 
