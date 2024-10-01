@@ -11,7 +11,7 @@
 pip install dns-manager[all]
 ```
 
-如果想要尝试 Nightly 版本，可尝试（需确保使用`Python3.12`）
+如果想要尝试 Nightly 版本，可尝试（需确保使用 Python3.12）
 ```shell
 pip install git+https://github.com/zrr1999/dns-manager@main
 ```
@@ -22,10 +22,10 @@ pipx install dns-manager[all]
 uv tool install dns-manager[all]
 ```
 
-pipx/uv 会类似 Homebrew 无感地为 yutto 创建一个虚拟环境，与其余环境隔离开，避免污染 pip 的环境，
+pipx/uv 会无感地为 dns-manager 创建一个虚拟环境，与其余环境隔离开，避免污染其他环境，
 因此相对于 pip，pipx/uv 是更推荐的安装方式（uv 会比 pipx 更快些～）。
 
-### 源码安装（需确保使用`Python3.12`）
+### 源码安装（需确保使用 Python3.12）
 
 ```shell
 git clone https://github.com/zrr1999/dns-manager

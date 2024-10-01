@@ -38,11 +38,11 @@ source = "scm"
 write_to = "dns_manager/__version__.py"
 write_template = "__version__ = '{}'"
 
-[tool.pdm.dev-dependencies]
-test = ["xdoctest", "pytest", "pytest-cov", "coverage"]
-
 [tool.pdm.build]
 includes = ["dns_manager"]
+
+[tool.uv]
+dev-dependencies = ["xdoctest", "pytest", "pytest-cov", "coverage"]
 
 [tool.ruff]
 line-length = 100
