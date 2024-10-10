@@ -14,10 +14,8 @@ jobs:
     steps:
       - name: Checkout 📦
         uses: actions/checkout@v4
-      - name: Setup PDM 📦
-        uses: pdm-project/setup-pdm@v4
-        with:
-          python-version: "3.12"
+      - name: Install the latest version of uv 📦
+        uses: astral-sh/setup-uv@v3
       - name: Install just 📦
         uses: extractions/setup-just@v2
         env:
@@ -28,9 +26,8 @@ jobs:
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENTCLOUD_SECRET_KEY }}
           LEXICON_CLOUDFLARE_AUTH_TOKEN: ${{ secrets.LEXICON_CLOUDFLARE_AUTH_TOKEN }}
         run: |
-          just ci-init
+          just install
           just coverage
-
       - name: Upload coverage reports to Codecov 🚀
         uses: codecov/codecov-action@v4-beta
         env:

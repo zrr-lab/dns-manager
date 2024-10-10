@@ -1,9 +1,9 @@
-ruff:
-    ruff format .
-    ruff check . --fix
+install:
+    uv sync --all-extras --dev
 
-ci-init:
-    pdm install
+ruff:
+    uv run ruff format .
+    uv run ruff check . --fix --unsafe-fixes
 
 coverage:
     pdm run pytest ./tests ./dns_manager --cov=dns_manager --xdoc

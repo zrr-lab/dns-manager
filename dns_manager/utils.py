@@ -70,9 +70,9 @@ def load_dict_from_path(path: Path) -> dict[str, Any]:
 
             config = json.load(f)
         elif path.suffix == ".toml":
-            import toml
+            import rtoml
 
-            config = toml.load(f)
+            config = rtoml.load(f)
         elif path.suffix == ".yaml":
             import yaml
             from yaml import FullLoader
@@ -120,9 +120,9 @@ def save_config(path: Path, config: dict) -> None:
 
             json.dump(config, f, indent=2)
         elif path.suffix == ".toml":
-            import toml
+            import rtoml
 
-            toml.dump(config, f)
+            rtoml.dump(config, f)
         elif path.suffix == ".yaml":
             import yaml
 
