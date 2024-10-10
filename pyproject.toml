@@ -41,9 +41,17 @@ write_template = "__version__ = '{}'"
 
 [tool.pdm.build]
 includes = ["dns_manager"]
+source-includes = ["tests", "README.md"]
 
 [tool.uv]
-dev-dependencies = ["xdoctest", "pytest", "pytest-cov", "coverage"]
+dev-dependencies = [
+    "ruff",
+    "xdoctest",
+    "pytest",
+    "pytest-cov",
+    "pytest-codspeed",
+    "pytest-asyncio",
+]
 
 [tool.ruff]
 line-length = 100
