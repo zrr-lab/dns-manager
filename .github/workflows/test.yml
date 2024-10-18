@@ -16,6 +16,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Install the latest version of uv 📦
         uses: astral-sh/setup-uv@v3
+      - name: Install Python 📦
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
       - name: Install just 📦
         uses: extractions/setup-just@v2
         env:
