@@ -6,9 +6,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target-version: [py310, py311, py312]
     concurrency: release
     permissions:
       id-token: write
@@ -28,9 +25,10 @@ jobs:
     - name: Install the latest version of uv 📦
       uses: astral-sh/setup-uv@v2
     - name: Build distributions 📦
-      env:
-        PYFUTURE_TARGET: ${{ matrix.target-version }}
-      run: uv build
+      run: |
+        PYFUTURE_TARGET=py312 uv build --wheel
+        PYFUTURE_TARGET=py311 uv build --wheel
+        PYFUTURE_TARGET=py310 uv build --wheel
     - name: Publish package distributions to PyPI 🚀
       if: steps.release.outputs.released == 'true'
       uses: pypa/gh-action-pypi-publish@release/v1

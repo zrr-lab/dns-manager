@@ -10,20 +10,25 @@ permissions:
 
 jobs:
   coverage:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout 📦
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Install just 📦
+        uses: extractions/setup-just@v2
       - name: Install the latest version of uv 📦
         uses: astral-sh/setup-uv@v3
       - name: Install Python 📦
         uses: actions/setup-python@v4
         with:
           python-version: "3.12"
-      - name: Install just 📦
-        uses: extractions/setup-just@v2
+      - name: Install dependencies 📦
+        run: just install
+      - run: |
+          uv run dnsm update examples/simple.toml
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENTCLOUD_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENTCLOUD_SECRET_KEY }}
+          LEXICON_CLOUDFLARE_AUTH_TOKEN: ${{ secrets.LEXICON_CLOUDFLARE_AUTH_TOKEN }}
       - name: Run tests and benchmarks ✅
         uses: CodSpeedHQ/action@v3
         env:
@@ -33,9 +38,9 @@ jobs:
         with:
           run: just test
       - name: Upload coverage reports to Codecov 🚀
-        uses: codecov/codecov-action@v4-beta
+        uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          flags: Pyfuture
+          flags: dns-manager
           plugins: pycoverage,compress-pycoverage
