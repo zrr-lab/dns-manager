@@ -1,0 +1,6 @@
+[test]
+domain = "bone6.com"
+setter_name = "cloudflare"
+records = [
+    ["test", "baidu.com"]
+]
