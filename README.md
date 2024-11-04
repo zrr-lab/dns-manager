@@ -49,22 +49,22 @@ pip install .
 ```
 
 ## 使用说明
-首先创建一个配置文件，例如 `sdns.json`，内容如下：
-```json
-{
-  "domain": "mydomain.com",
-  "records": [
+首先创建一个配置文件，例如类似 `examples/simple.toml` 文件中的内容，内容如下：
+```toml
+[test]
+domain = "mydomain.com"
+setter_name = "cloudflare"
+records = [
     [
-      "test", // 也就是 test.mydomain.com 指向的路径
-      "baidu.com" // 解析值，目前只支持 A 记录和 CNAME 记录，会根据此处的值自动判断
-    ],
-  ]
-}
+      "test",  # 也就是 test.mydomain.com 指向的路径
+      "baidu.com"  # 解析值，目前只支持 A 记录和 CNAME 记录，会根据此处的值自动判断
+    ]
+]
 ```
 然后执行以下命令：
 ```shell
-dns-manager update ~/.config/dns-manager/sdns.json
-# dnsm update ~/.config/dns-manager/sdns.json
+dns-manager update examples/simple.toml
+# dnsm update examples/simple.toml
 ```
 此时，你的解析记录就会增加一条 `test.mydomain.com` 的 CNAME 记录指向 `baidu.com` 。
 
