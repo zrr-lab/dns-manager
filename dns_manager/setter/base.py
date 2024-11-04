@@ -106,15 +106,18 @@ class DNSSetterBase:
                     records.append((subdomain, record.value))
                     logger.warning(f"([red]🔓 Unmanaged[/]) {record}")
                 path = Path("~/.config/dns-manager/unmanaged.json")
-                save_config(
-                    path,
-                    Config(
-                        domain=self.domain,
-                        setter_name=self.setter_name,
-                        records=records,
-                    ).model_dump(),
-                )
-                logger.info(f"Unmanaged records saved to [bold purple]{path}[/].")
+                try:
+                    save_config(
+                        path,
+                        Config(
+                            domain=self.domain,
+                            setter_name=self.setter_name,
+                            records=records,
+                        ).model_dump(),
+                    )
+                    logger.info(f"Unmanaged records saved to [bold purple]{path}[/].")
+                except Exception as e:
+                    logger.warning(f"Failed to save unmanaged records: {e}")
         for subdomain, record in new_records.items():
             cached_record = self.cached_records.get(subdomain, None)
             if cached_record is None:
