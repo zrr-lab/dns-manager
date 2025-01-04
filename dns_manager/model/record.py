@@ -11,7 +11,8 @@ class Record(BaseModel):
     def __hash__(self) -> int:
         return hash(self.subdomain)
 
-    def __eq__(self, other: Record) -> bool:
+    def __eq__(self, other) -> bool:
+        other = Record.model_validate(other)
         return (
             self.subdomain == other.subdomain
             and self.value == other.value
@@ -19,4 +20,4 @@ class Record(BaseModel):
         )
 
     def __str__(self) -> str:
-        return f"[bold blue]{self.type}[/]: {self.subdomain} [bold blue]➡️[/] {self.value}"
+        return f"[bold blue]{self.type}[/]: {self.subdomain} ➡️ {self.value}"
