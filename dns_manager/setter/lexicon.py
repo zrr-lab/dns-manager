@@ -5,6 +5,7 @@ from lexicon.client import Client
 from lexicon.config import ConfigResolver
 from lexicon.exceptions import LexiconError
 from loguru import logger
+from requests.exceptions import HTTPError
 
 from ..model import Record
 from .base import DNSSetterBase, RecordStatus, catch_failed_exceptions
@@ -70,7 +71,7 @@ class LexiconSetter(DNSSetterBase):
     def get_record_id(self, record: Record) -> str:
         return self.mapping_record_to_id[record]
 
-    @catch_failed_exceptions(LexiconError)
+    @catch_failed_exceptions(LexiconError, HTTPError)
     def create_record(self, record: Record) -> RecordStatus:
         subdomain, value, record_type = record.subdomain, record.value, record.type
         subdomain = ".".join(subdomain) if isinstance(subdomain, list) else subdomain
@@ -78,13 +79,13 @@ class LexiconSetter(DNSSetterBase):
             operations.create_record(record_type, subdomain, value)
         return RecordStatus.CREATED
 
-    @catch_failed_exceptions(LexiconError)
+    @catch_failed_exceptions(LexiconError, HTTPError)
     def delete_record(self, record_id: str) -> RecordStatus:
         with self.client as operations:
             operations.delete_record(record_id)
         return RecordStatus.DELETED
 
-    @catch_failed_exceptions(LexiconError)
+    @catch_failed_exceptions(LexiconError, HTTPError)
     def modify_record(self, record_id: str, record: Record) -> RecordStatus:
         subdomain, value, record_type = record.subdomain, record.value, record.type
         subdomain = ".".join(subdomain) if isinstance(subdomain, list) else subdomain
