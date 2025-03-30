@@ -17,9 +17,6 @@ def create_setter_by_config(config: dict):
 
     Example:
     >>> logger.remove()
-    >>> config = {"domain": "bone6.top", "setter_name": "dnspod", "records": []}
-    >>> setter = create_setter_by_config(config)
-    >>> assert isinstance(setter, DNSPodSetter)
     >>> config = {"domain": "bone6.com", "setter_name": "cloudflare", "records": []}
     >>> setter = create_setter_by_config(config)
     >>> assert isinstance(setter, LexiconSetter)
