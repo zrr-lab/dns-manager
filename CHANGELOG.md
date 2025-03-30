@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## v0.1.2 (2025-03-30)
+
+### ⬆️ deps
+
+* ⬆️ deps: upgrade typer ([`2d791b6`](https://github.com/zrr-lab/dns-manager/commit/2d791b697baddc62fef69dcf612d3db0cd060fb4))
+
+* ⬆️ deps: add pyright in dev deps ([`7a49a1f`](https://github.com/zrr-lab/dns-manager/commit/7a49a1f5d9f4664bd9c0917aa0118f5ad14f16f7))
+
+### 🐛 fix
+
+* 🐛 fix: support catch HTTPError ([`0ba7e68`](https://github.com/zrr-lab/dns-manager/commit/0ba7e6843471ea261d7961cec66d52ae973bfdc3))
+
+### 👷 ci
+
+* 👷 ci: add type check action ([`d849527`](https://github.com/zrr-lab/dns-manager/commit/d8495279b1e7970b10b09f867979142f5526b672))
+
+### 📝 docs
+
+* 📝 docs: update readme ([`a99a82c`](https://github.com/zrr-lab/dns-manager/commit/a99a82c3a3fceba474ae6c14704ed78371b5af97))
+
 ## v0.1.1 (2024-11-04)
 
 ### ✅ test
