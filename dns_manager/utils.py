@@ -8,7 +8,7 @@ from loguru import logger
 
 from .getter import PublicGetter, SnmpGetter
 from .model import Record
-from .setter import DNSPodSetter, LexiconSetter
+from .setter import LexiconSetter
 
 
 def create_setter_by_config(config: dict):
@@ -24,8 +24,6 @@ def create_setter_by_config(config: dict):
     """
     setter_name = config["setter_name"]
     match setter_name:
-        case "dnspod":
-            setter = DNSPodSetter(config)
         case _:
             setter = LexiconSetter(config)
     return setter

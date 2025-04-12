@@ -15,8 +15,6 @@ dependencies = [
     "httpx>=0.26.0",
     "dns-lexicon>=3.17.0",
     "scapy>=2.5.0",
-    # deprecated
-    "tencentcloud-sdk-python-dnspod",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

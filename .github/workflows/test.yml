@@ -26,14 +26,10 @@ jobs:
       - run: |
           uv run dnsm update examples/simple.toml
         env:
-          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENTCLOUD_SECRET_ID }}
-          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENTCLOUD_SECRET_KEY }}
           LEXICON_CLOUDFLARE_AUTH_TOKEN: ${{ secrets.LEXICON_CLOUDFLARE_AUTH_TOKEN }}
       - name: Run tests and benchmarks ✅
         uses: CodSpeedHQ/action@v3
         env:
-          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENTCLOUD_SECRET_ID }}
-          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENTCLOUD_SECRET_KEY }}
           LEXICON_CLOUDFLARE_AUTH_TOKEN: ${{ secrets.LEXICON_CLOUDFLARE_AUTH_TOKEN }}
         with:
           run: just test

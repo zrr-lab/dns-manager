@@ -59,7 +59,7 @@ class LexiconSetter(DNSSetterBase):
                 output_record_list.append(record)
                 self.mapping_record_to_id[record] = dict_record["id"]
             return output_record_list
-        except LexiconError as err:
+        except (LexiconError, HTTPError) as err:
             logger.exception(err)
             return []
 

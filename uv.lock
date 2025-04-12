@@ -351,7 +351,7 @@ wheels = [
 
 [[package]]
 name = "dns-manager"
-version = "0.1.2.dev3+g7a49a1f.d20250330"
+version = "0.1.2+d20250412"
 source = { editable = "." }
 dependencies = [
     { name = "cachetools" },
@@ -364,7 +364,6 @@ dependencies = [
     { name = "rich" },
     { name = "rtoml" },
     { name = "scapy" },
-    { name = "tencentcloud-sdk-python-dnspod" },
     { name = "typer" },
 ]
 
@@ -400,7 +399,6 @@ requires-dist = [
     { name = "rich", specifier = ">=13.7.0" },
     { name = "rtoml", specifier = ">=0.11.0" },
     { name = "scapy", specifier = ">=2.5.0" },
-    { name = "tencentcloud-sdk-python-dnspod" },
     { name = "typer", specifier = ">=0.15.2" },
     { name = "watchfiles", marker = "extra == 'watch'" },
 ]
@@ -998,30 +996,6 @@ source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
 sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/d7/ce/fbaeed4f9fb8b2daa961f90591662df6a86c1abf25c548329a86920aedfb/soupsieve-2.6.tar.gz", hash = "sha256:e2e68417777af359ec65daac1057404a3c8a5455bb8abc36f1a9866ab1a51abb", size = 101569 }
 wheels = [
     { url = "https://pypi.tuna.tsinghua.edu.cn/packages/d1/c2/fe97d779f3ef3b15f05c94a2f1e3d21732574ed441687474db9d342a7315/soupsieve-2.6-py3-none-any.whl", hash = "sha256:e72c4ff06e4fb6e4b5a9f0f55fe6e81514581fca1515028625d0f299c602ccc9", size = 36186 },
-]
-
-[[package]]
-name = "tencentcloud-sdk-python-common"
-version = "3.0.1244"
-source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
-dependencies = [
-    { name = "requests" },
-]
-sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/cc/56/2bb631c7174521dff7bc6a642e8b2faeaa0f44724d16c0567e853ec5001d/tencentcloud-sdk-python-common-3.0.1244.tar.gz", hash = "sha256:51e895a4f380ead51de5ebcef990cfda17cf466b130b8d1be7a95c11158a66e2", size = 16357 }
-wheels = [
-    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/ae/97/7cdc53bf58277fe3f17bc16d80e749d4598eb529efde5dad7213309118f8/tencentcloud_sdk_python_common-3.0.1244-py2.py3-none-any.whl", hash = "sha256:a3275496740d7876386166e83331eab7ad66e70fe4216c96893e9697fdeb9848", size = 23396 },
-]
-
-[[package]]
-name = "tencentcloud-sdk-python-dnspod"
-version = "3.0.1244"
-source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
-dependencies = [
-    { name = "tencentcloud-sdk-python-common" },
-]
-sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/91/20/41d6c8dbf4af21b8cefa208c81eac2775802ea8cb08a088a643fc83e2702/tencentcloud-sdk-python-dnspod-3.0.1244.tar.gz", hash = "sha256:1d6f2345902aad7f7e102cf686435c2465bcada14e828fe672872e63e0e5363c", size = 51721 }
-wheels = [
-    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/c0/69/81e0161dfdca36614386869a16605f05ecc0100a97f40646c7ba89ca3241/tencentcloud_sdk_python_dnspod-3.0.1244-py2.py3-none-any.whl", hash = "sha256:e06d7967afafd4dc253b2596149056236a3a9f655ba62c89fb182dc96e404342", size = 53648 },
 ]
 
 [[package]]
