@@ -38,18 +38,11 @@ uv tool install dns-manager[all]
 ```
 
 pipx/uv 会无感地为 dns-manager 创建一个虚拟环境，与其余环境隔离开，避免污染其他环境，
-因此相对于 pip，pipx/uv 是更推荐的安装方式（uv 会比 pipx 更快些～）。
-
-### 源码安装（需确保使用 Python3.12）
-
-```shell
-git clone https://github.com/zrr1999/dns-manager
-cd dns-manager
-pip install .
-```
+因此相对于 pip，pipx/uv 是更推荐的安装方式。
 
 ## 使用说明
-首先创建一个配置文件，例如类似 `examples/simple.toml` 文件中的内容，内容如下：
+### 基础示例
+首先创建一个配置文件，例如类似 `examples/simple.toml` 文件中的内容，如下：
 ```toml
 [test]
 domain = "mydomain.com"
@@ -68,6 +61,10 @@ dns-manager update examples/simple.toml
 ```
 此时，你的解析记录就会增加一条 `test.mydomain.com` 的 CNAME 记录指向 `baidu.com` 。
 
+### 支持的 dns 提供商
+本项目实现了一个 [lexicon](https://github.com/dns-lexicon/dns-lexicon) 的适配 Setter，
+支持情况与其一致。
+
 ### 定时执行
 你可以使用 [cronie](https://github.com/cronie-crond/cronie) 定时执行，例如
 ```
@@ -80,10 +77,6 @@ dns-manager update examples/simple.toml
 (crontab -l 2>/dev/null; echo "@reboot dnsm update ~/.config/dns-manager/config.toml") | crontab
 (crontab -l 2>/dev/null; echo "@hourly dnsm update ~/.config/dns-manager/config.toml") | crontab
 ```
-
-## 维护者
-
-@zrr1999
 
 ## 如何贡献
 
