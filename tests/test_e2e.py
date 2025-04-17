@@ -15,6 +15,6 @@ def test_e2e(config_path: str):
 
     runner = CliRunner()
     result = runner.invoke(app, ["update", config_path])
-    assert (
-        result.exit_code == 0
-    ), f"Exit code was {result.exit_code}, expected 0. Error: {result.exc_info}"
+    assert result.exit_code == 0, (
+        f"Exit code was {result.exit_code}, expected 0. Error: {result.exc_info}"
+    )
