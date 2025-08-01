@@ -23,7 +23,7 @@ jobs:
         changelog: true
         root_options: "-c releaserc.toml -vv"
     - name: Install the latest version of uv 📦
-      uses: astral-sh/setup-uv@v2
+      uses: astral-sh/setup-uv@v6
     - name: Build distributions 📦
       run: |
         PYFUTURE_TARGET=py312 uv build --wheel
@@ -31,7 +31,7 @@ jobs:
         PYFUTURE_TARGET=py310 uv build --wheel
     - name: Publish package distributions to GitHub Releases 🚀
       if: steps.release.outputs.released == 'true'
-      uses: python-semantic-release/publish-action@v9.9.0
+      uses: python-semantic-release/publish-action@v10
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ steps.release.outputs.tag }}

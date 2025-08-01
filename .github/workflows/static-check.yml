@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install the latest version of uv 📦
-        uses: astral-sh/setup-uv@v2
+        uses: astral-sh/setup-uv@v6
       - name: Install python 📦
         uses: actions/setup-python@v4
         with:

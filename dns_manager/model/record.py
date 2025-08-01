@@ -15,7 +15,7 @@ class Record(BaseModel):
         other = Record.model_validate(other)
         return (
             self.subdomain == other.subdomain
-            and self.value == other.value
+            and self.value.strip(".") == other.value.strip(".")
             and self.type == other.type
         )
 
