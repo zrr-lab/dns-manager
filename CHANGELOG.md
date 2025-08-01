@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## v0.1.3 (2025-08-01)
+
+### 🐛 fix
+
+* 🐛 fix: fix eq method of Record ([`57bd9c2`](https://github.com/zrr-lab/dns-manager/commit/57bd9c26f4f5b983703dbf8cbc619907824d233f))
+
+### 📝 docs
+
+* 📝 docs: update readme.md ([`afe80d9`](https://github.com/zrr-lab/dns-manager/commit/afe80d963466dc01fc96f0854459ca31a2192299))
+
+### 🔧 chore
+
+* 🔧 chore: format ([`13729f3`](https://github.com/zrr-lab/dns-manager/commit/13729f309e99e6af52e865d945753e20294446bc))
+
+* 🔧 chore: update pre-commit hooks and github actions dependencies ([`9bfcffd`](https://github.com/zrr-lab/dns-manager/commit/9bfcffdd87bc707b8cb8339f412a2ab3da3a43db))
+
+* 🔧 chore: clean tencentcloud ([`261d3e1`](https://github.com/zrr-lab/dns-manager/commit/261d3e16bc712f43193d39c07ffe032b01b90023))
+
 ## v0.1.2 (2025-03-30)
 
 ### ⬆️ deps
