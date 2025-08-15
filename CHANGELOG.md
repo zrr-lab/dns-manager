@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.2.0 (2025-08-15)
+
+### ✨ feat
+
+* ✨ feat: support ipv6 ([`9cb7dde`](https://github.com/zrr-lab/dns-manager/commit/9cb7ddecc0e51818d6c3039b85db92a386ec9a80))
+
 ## v0.1.3 (2025-08-01)
 
 ### 🐛 fix
