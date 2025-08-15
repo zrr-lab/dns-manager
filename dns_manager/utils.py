@@ -30,27 +30,31 @@ def create_setter_by_config(config: dict):
 
 
 def generate_record(name: str, value: str) -> Record:
-    if value.startswith("http"):
-        record_type = "显性URL"
-        return Record(subdomain=name, value=value, type=record_type)
-
-    match value.split(":"):
-        case (value,) if re.match("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", value):
+    match value:
+        case value if re.match(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", value):
             record_type = "A"
-            # TODO: to support ipv6
-        case (value,):
+        case value if re.match(
+            r"((?:[\da-fA-F]{0,4}:[\da-fA-F]{0,4}){2,7})(?:[\/\\%](\d{1,3}))?", value
+        ):
+            record_type = "AAAA"
+        case value if re.match(
+            r"[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?$",
+            value,
+        ):
             record_type = "CNAME"
-        case ("snmp", interface_name):
-            record_type = "A"
-            getter = SnmpGetter(interface_name)
-            value = getter.get_ip()
-        case ("public", url):
-            record_type = "A"
-            getter = PublicGetter(url)
-            value = getter.get_ip()
         case _:
-            logger.warning(f"Unsupportted value {value}, use TXT as default")
-            record_type = "TXT"
+            match value.split(":"):
+                case ("snmp", interface_name):
+                    record_type = "A"
+                    getter = SnmpGetter(interface_name)
+                    value = getter.get_ip()
+                case ("public", url):
+                    record_type = "A"
+                    getter = PublicGetter(url)
+                    value = getter.get_ip()
+                case _:
+                    logger.warning(f"Unsupportted value {value}, use TXT as default")
+                    record_type = "TXT"
 
     return Record(subdomain=name, value=value, type=record_type)
 
@@ -85,9 +89,9 @@ def load_config_from_path(path: Path) -> list[dict[str, Any]]:
     configs: list[dict[str, Any]] = []
     for domain_config in origin_configs.values():
         assert "domain" in domain_config, f"Config must contain `domain`, config: {domain_config}"
-        assert "setter_name" in domain_config, (
-            f"Config must contain `setter_name`, config: {domain_config}"
-        )
+        assert (
+            "setter_name" in domain_config
+        ), f"Config must contain `setter_name`, config: {domain_config}"
 
         if "records" not in domain_config:
             domain_config["records"] = []

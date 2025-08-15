@@ -28,8 +28,6 @@ class LexiconSetter(DNSSetterBase):
     def preprocess_record(self, record: Record) -> Record:
         subdomain, rtype, value = record.subdomain, record.type, record.value
         subdomain = subdomain.removesuffix(f".{self.domain}")
-        if rtype == "显性URL":
-            rtype = "URI"
         value = value.removesuffix(".")
         return Record(subdomain=subdomain, type=rtype, value=value)
 
@@ -49,6 +47,8 @@ class LexiconSetter(DNSSetterBase):
                     dict_record["type"],
                     dict_record["content"],
                 )
+                if record_type not in ("A", "AAAA", "CNAME", "TXT"):
+                    continue
                 record = self.preprocess_record(
                     Record(
                         subdomain=subdomain,
@@ -90,6 +90,5 @@ class LexiconSetter(DNSSetterBase):
         subdomain, value, record_type = record.subdomain, record.value, record.type
         subdomain = ".".join(subdomain) if isinstance(subdomain, list) else subdomain
         with self.client as operations:
-            record_type = record_type if record_type != "显性URL" else "URI"
             operations.update_record(record_id, record_type, subdomain, value)
         return RecordStatus.MODIFIED
