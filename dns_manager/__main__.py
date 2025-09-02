@@ -18,7 +18,10 @@ from dns_manager.utils import create_setter_by_config, load_config_from_path
 app = typer.Typer()
 
 
-def init_logger(log_level: str):
+@app.callback()
+def main(
+    log_level: str = "INFO",
+):
     log_level = os.environ.get("LOG_LEVEL", log_level)
     handler = RichHandler(
         console=Console(style=Style()), highlighter=NullHighlighter(), markup=True
@@ -31,9 +34,7 @@ def init_logger(log_level: str):
 def update(
     path: Path,
     remove_unmanaged: bool = False,
-    log_level: str = "INFO",
 ):
-    init_logger(log_level)
     logger.info(f"Loading dns config from [bold purple]{path}[/].")
     configs = load_config_from_path(path)
     for config in configs:
@@ -44,9 +45,7 @@ def update(
 @app.command()
 def watch(
     path: Path,
-    log_level: str = "INFO",
 ):
-    init_logger(log_level)
     path = path.expanduser()
     asyncio.run(watch_async(path))
 
