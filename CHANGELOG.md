@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.3.0 (2025-09-02)
+
+### ✨ feat
+
+* ✨ feat: use `app.callback` ([`00bffb6`](https://github.com/zrr-lab/dns-manager/commit/00bffb61cb83e9de8e3d109b804aa44fff43a4cf))
+
 ## v0.2.0 (2025-08-15)
 
 ### ✨ feat
