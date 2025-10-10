@@ -34,6 +34,15 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+dev = [
+    "pyright",
+    "ruff",
+    "xdoctest",
+    "pytest",
+    "pytest-cov",
+    "pytest-codspeed",
+    "pytest-asyncio",
+]
 watch = ["watchfiles"]
 all = ["dns-manager[watch]"]
 
@@ -53,17 +62,6 @@ write_template = "__version__ = '{}'"
 [tool.pdm.build]
 includes = ["dns_manager"]
 source-includes = ["tests", "README.md"]
-
-[tool.uv]
-dev-dependencies = [
-    "pyright",
-    "ruff",
-    "xdoctest",
-    "pytest",
-    "pytest-cov",
-    "pytest-codspeed",
-    "pytest-asyncio",
-]
 
 [tool.ruff]
 line-length = 100

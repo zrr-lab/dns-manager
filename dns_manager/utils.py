@@ -89,9 +89,9 @@ def load_config_from_path(path: Path) -> list[dict[str, Any]]:
     configs: list[dict[str, Any]] = []
     for domain_config in origin_configs.values():
         assert "domain" in domain_config, f"Config must contain `domain`, config: {domain_config}"
-        assert (
-            "setter_name" in domain_config
-        ), f"Config must contain `setter_name`, config: {domain_config}"
+        assert "setter_name" in domain_config, (
+            f"Config must contain `setter_name`, config: {domain_config}"
+        )
 
         if "records" not in domain_config:
             domain_config["records"] = []

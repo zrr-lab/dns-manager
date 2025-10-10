@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.9"
 resolution-markers = [
     "python_full_version < '3.12'",
@@ -371,11 +371,6 @@ dependencies = [
 all = [
     { name = "watchfiles" },
 ]
-watch = [
-    { name = "watchfiles" },
-]
-
-[package.dev-dependencies]
 dev = [
     { name = "pyright" },
     { name = "pytest" },
@@ -384,6 +379,9 @@ dev = [
     { name = "pytest-cov" },
     { name = "ruff" },
     { name = "xdoctest" },
+]
+watch = [
+    { name = "watchfiles" },
 ]
 
 [package.metadata]
@@ -395,25 +393,21 @@ requires-dist = [
     { name = "loguru", specifier = ">=0.7.2" },
     { name = "pydantic", specifier = ">=2.5.3" },
     { name = "pyparsing", specifier = ">=3.1.1" },
+    { name = "pyright", marker = "extra == 'dev'" },
+    { name = "pytest", marker = "extra == 'dev'" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'" },
+    { name = "pytest-codspeed", marker = "extra == 'dev'" },
+    { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "pyyaml", specifier = ">=6.0.1" },
     { name = "rich", specifier = ">=13.7.0" },
     { name = "rtoml", specifier = ">=0.12.0" },
+    { name = "ruff", marker = "extra == 'dev'" },
     { name = "scapy", specifier = ">=2.5.0" },
     { name = "typer", specifier = ">=0.15.2" },
     { name = "watchfiles", marker = "extra == 'watch'" },
+    { name = "xdoctest", marker = "extra == 'dev'" },
 ]
-provides-extras = ["watch", "all"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pyright" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-codspeed" },
-    { name = "pytest-cov" },
-    { name = "ruff" },
-    { name = "xdoctest" },
-]
+provides-extras = ["dev", "watch", "all"]
 
 [[package]]
 name = "dnspython"
