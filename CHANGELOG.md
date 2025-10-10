@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.4.0 (2025-10-10)
+
+### ✨ feat
+
+* ✨ feat: add Renovate configuration file ([`ffad3d7`](https://github.com/zrr-lab/dns-manager/commit/ffad3d7fa99a125d6fe9ac131c37b710c9068716))
+
+### ⬆️ deps
+
+* ⬆️ deps: upgrade config ([`003c814`](https://github.com/zrr-lab/dns-manager/commit/003c81475bfb7cad1e5cda3193bd9e04c843c886))
+
 ## v0.3.0 (2025-09-02)
 
 ### ✨ feat
