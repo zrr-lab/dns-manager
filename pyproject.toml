@@ -1,50 +1,37 @@
 [project]
 name = "dns-manager"
-dynamic = ["version"]
 description = "Manage your DNS records with ease."
-authors = [{ name = "Zhan Rongrui", email = "2742392377@qq.com" }]
-dependencies = [
-    "loguru>=0.7.2",
-    "rich>=13.7.0",
-    "pyparsing>=3.1.1",
-    "typer>=0.15.2",
-    "cachetools>=5.3.2",
-    "pydantic>=2.5.3",
-    "pyyaml>=6.0.1",
-    "rtoml>=0.12.0",
-    "httpx>=0.26.0",
-    "dns-lexicon>=3.17.0",
-    "scapy>=2.5.0",
-]
-requires-python = ">=3.9"
 readme = "README.md"
+requires-python = ">=3.9"
 license = { file = "LICENSE" }
+authors = [{ name = "Zhan Rongrui", email = "2742392377@qq.com" }]
 classifiers = [
-    "Environment :: Console",
-    "Operating System :: OS Independent",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-    "Typing :: Typed",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: Implementation :: CPython",
+  "Environment :: Console",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Typing :: Typed",
 ]
-
-[project.optional-dependencies]
-dev = [
-    "pyright",
-    "ruff",
-    "xdoctest",
-    "pytest",
-    "pytest-cov",
-    "pytest-codspeed",
-    "pytest-asyncio",
+dependencies = [
+  "cachetools>=5.3.2",
+  "dns-lexicon>=3.17.0",
+  "httpx>=0.26.0",
+  "loguru>=0.7.2",
+  "pydantic>=2.5.3",
+  "pyparsing>=3.1.1",
+  "pyyaml>=6.0.1",
+  "rich>=13.7.0",
+  "rtoml>=0.12.0",
+  "scapy>=2.5.0",
+  "typer>=0.15.2",
 ]
-watch = ["watchfiles"]
-all = ["dns-manager[watch]"]
+dynamic = ["version"]
 
 [project.urls]
 Homepage = "https://github.com/zrr1999/dns-manager.git"
@@ -53,6 +40,23 @@ Repository = "https://github.com/zrr1999/dns-manager.git"
 [project.scripts]
 dns-manager = "dns_manager.__main__:app"
 dnsm = "dns_manager.__main__:app"
+
+[project.optional-dependencies]
+all = ["dns-manager[watch]"]
+dev = [
+  "pyright",
+  "ruff",
+  "xdoctest",
+  "pytest",
+  "pytest-cov",
+  "pytest-codspeed",
+  "pytest-asyncio",
+]
+watch = ["watchfiles"]
+
+[build-system]
+requires = ["pdm-backend", "pdm-pyfuture"]
+build-backend = "pdm.backend"
 
 [tool.pdm.version]
 source = "scm"
@@ -70,18 +74,18 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = [
-    "F",
-    "SIM",
-    "UP",
-    "FA",  # flake8-annotations
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "PGH", # pygrep-hooks
-    "RUF", # ruff
-    "E",   # pycodestyle
-    "W",   # pycodestyle
-    "YTT", # flake8-2020
+  "F",
+  "SIM",
+  "UP",
+  "FA",  # flake8-annotations
+  "I",  # isort
+  "B",  # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "PGH",  # pygrep-hooks
+  "RUF",  # ruff
+  "E",  # pycodestyle
+  "W",  # pycodestyle
+  "YTT",  # flake8-2020
 ]
 
 [tool.ruff.lint.isort]
@@ -90,7 +94,3 @@ required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "I002"]
-
-[build-system]
-requires = ["pdm-backend", "pdm-pyfuture"]
-build-backend = "pdm.backend"

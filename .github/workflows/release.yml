@@ -11,35 +11,36 @@ jobs:
       id-token: write
       contents: write
     steps:
-    - name: Checkout 📦
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - name: Python Semantic Release 🚀
-      id: release
-      uses: python-semantic-release/python-semantic-release@v9.9.0
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        changelog: true
-        root_options: "-c releaserc.toml -vv"
-    - name: Install the latest version of uv 📦
-      uses: astral-sh/setup-uv@v6
-    - name: Build distributions 📦
-      run: |
-        PYFUTURE_TARGET=py312 uv build --wheel
-        PYFUTURE_TARGET=py311 uv build --wheel
-        PYFUTURE_TARGET=py310 uv build --wheel
-    - name: Publish package distributions to GitHub Releases 🚀
-      if: steps.release.outputs.released == 'true'
-      uses: python-semantic-release/publish-action@v10
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ steps.release.outputs.tag }}
-    - name: Publish package distributions to PyPI 🚀
-      if: steps.release.outputs.released == 'true'
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        verbose: true
+      - name: Checkout 📦
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Python Semantic Release 🚀
+        id: release
+        uses: python-semantic-release/python-semantic-release@v10
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          changelog: true
+          config_file: releaserc.toml
+          verbosity: 2
+      - name: Install the latest version of uv 📦
+        uses: astral-sh/setup-uv@v6
+      - name: Build distributions 📦
+        run: |
+          PYFUTURE_TARGET=py312 uv build --wheel
+          PYFUTURE_TARGET=py311 uv build --wheel
+          PYFUTURE_TARGET=py310 uv build --wheel
+      - name: Publish package distributions to GitHub Releases 🚀
+        if: steps.release.outputs.released == 'true'
+        uses: python-semantic-release/publish-action@v10
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.release.outputs.tag }}
+      - name: Publish package distributions to PyPI 🚀
+        if: steps.release.outputs.released == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
     outputs:
       released: ${{ steps.release.outputs.released }}
       tag: ${{ steps.release.outputs.tag }}
