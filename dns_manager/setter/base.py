@@ -40,7 +40,8 @@ def catch_failed_exceptions(*exceptions: type[BaseException]):
             try:
                 return func(*args, **kwargs)
             except exceptions as e:
-                logger.error(f"Exception occurred in {func.__name__}: {e}")
+                func_name = getattr(func, "__name__", "unknown")
+                logger.error(f"Exception occurred in {func_name}: {e}")
                 return RecordStatus.FAILED
 
         return wrapper

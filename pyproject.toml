@@ -2,7 +2,7 @@
 name = "dns-manager"
 description = "Manage your DNS records with ease."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [{ name = "Zhan Rongrui", email = "2742392377@qq.com" }]
 classifiers = [
