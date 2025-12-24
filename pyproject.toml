@@ -43,16 +43,17 @@ dnsm = "dns_manager.__main__:app"
 
 [project.optional-dependencies]
 all = ["dns-manager[watch]"]
-dev = [
-  "pyright",
-  "ruff",
-  "xdoctest",
-  "pytest",
-  "pytest-cov",
-  "pytest-codspeed",
-  "pytest-asyncio",
-]
 watch = ["watchfiles"]
+
+[dependency-groups]
+dev = [
+  "pyright>=1.1.407",
+  "pytest>=9.0.1",
+  "pytest-asyncio>=1.3.0",
+  "pytest-codspeed>=4.2.0",
+  "pytest-cov>=7.0.0",
+  "xdoctest>=1.3.0",
+]
 
 [build-system]
 requires = ["pdm-backend", "pdm-pyfuture"]
