@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     name: CodeStyle Check
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install python 📦
         uses: actions/setup-python@v4
         with:
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Type Check
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install the latest version of uv 📦
         uses: astral-sh/setup-uv@v6
       - name: Install python 📦
