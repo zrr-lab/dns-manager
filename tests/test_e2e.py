@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+import os
+
 import pytest
 
 
 @pytest.mark.benchmark
+@pytest.mark.skipif(
+    os.environ.get("RUN_LIVE_DNS_TESTS") != "1"
+    or not os.environ.get("LEXICON_CLOUDFLARE_AUTH_TOKEN"),
+    reason="Live DNS tests require explicit opt-in and Cloudflare credentials",
+)
 @pytest.mark.parametrize(
     "config_path",
     ["./examples/simple.toml"],

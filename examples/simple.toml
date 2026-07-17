@@ -1,6 +1,4 @@
 [test]
-domain = "bone6.com"
+domain = "zrr.dev"
 setter_name = "cloudflare"
-records = [
-    ["test", "baidu.com"]
-]
+records = [["home", "public:https://api.ipify.org"]]

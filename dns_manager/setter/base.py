@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import asyncio
 from abc import abstractmethod
 from collections.abc import Callable
 from enum import Enum
 from functools import wraps
-from pathlib import Path
+from typing import Any, override
 
 from loguru import logger
 
@@ -19,6 +18,7 @@ class RecordStatus(Enum):
     DELETED = "DELETED"
     FAILED = "FAILED"
 
+    @override
     def __str__(self) -> str:
         match self.value:
             case "CREATED":
@@ -31,6 +31,8 @@ class RecordStatus(Enum):
                 return "[red]🔥 Deleted[/]"
             case "FAILED":
                 return "[red]❌ Failed[/]"
+            case _:
+                return self.value
 
 
 def catch_failed_exceptions(*exceptions: type[BaseException]):
@@ -50,18 +52,19 @@ def catch_failed_exceptions(*exceptions: type[BaseException]):
 
 
 class DNSSetterBase:
-    def __init__(self, config: dict):
-        self.cached_records: dict[str, Record] = {}
-        self.mapping_record_to_id: dict[Record, str] = {}
+    def __init__(self, config: dict[str, Any]):
+        self.cached_records: dict[tuple[str, str], Record] = {}
+        self.mapping_record_to_id: dict[tuple[str, str], str] = {}
+        self.ambiguous_record_keys: set[tuple[str, str]] = set()
+        self.ignored_records: set[str] = set()
         self.update_config(Config.model_validate(config))
-        self.fetch()
 
     def update_config(self, config: Config):
         self.config = config
         self.domain = self.config.domain
         self.setter_name = self.config.setter_name
+        self.ignored_records = set(self.config.ignore)
         self.record_config: list[tuple[str, str]] = []
-        self.ignored_records = set(self.config.ignore or [])
         for name, value in self.config.records:
             if value == "unknown" or value is None:
                 value = self.domain
@@ -70,57 +73,44 @@ class DNSSetterBase:
             else:
                 self.record_config.extend([(subdomain, value) for subdomain in name])
 
-    async def update_config_async(self, config: Config):
-        self.update_config(config)
-        await asyncio.sleep(0)
-
-    def generate_records(self) -> dict[str, Record]:
+    def generate_records(self) -> dict[tuple[str, str], Record]:
         from ..utils import generate_record
 
-        records: dict[str, Record] = {}
+        records: dict[tuple[str, str], Record] = {}
         for subdomain, value in self.record_config:
+            if subdomain in self.ignored_records:
+                logger.debug(f"Skipping ignored subdomain {subdomain}")
+                continue
             record = self.preprocess_record(generate_record(subdomain, value))
-            subdomain = record.subdomain
-            records[subdomain] = record
+            key = (record.subdomain, record.type)
+            if key in records:
+                raise ValueError(
+                    f"Multiple desired {record.type} records are configured for {record.subdomain}"
+                )
+            records[key] = record
         return records
 
-    def update_dns(self, remove_unmanaged: bool = False):
-        from ..utils import save_config
-
+    def update_dns(self) -> bool:
         new_records = self.generate_records()
-        unmanaged_records = (
-            set(self.cached_records.keys()) - set(new_records.keys()) - self.ignored_records
-        )
-        if len(unmanaged_records) > 0:
-            if remove_unmanaged:
-                for subdomain in unmanaged_records:
-                    record = self.cached_records[subdomain]
-                    record_id = self.get_record_id(record)
-                    status = self.delete_record(record_id)
-                    if status == RecordStatus.DELETED:
-                        del self.cached_records[subdomain]
-                    logger.info(f"({status}) {record}")
-            else:
-                records = []
-                for subdomain in unmanaged_records:
-                    record = self.cached_records[subdomain]
-                    records.append((subdomain, record.value))
-                    logger.warning(f"([red]🔓 Unmanaged[/]) {record}")
-                path = Path("~/.config/dns-manager/unmanaged.json")
-                try:
-                    save_config(
-                        path,
-                        Config(
-                            domain=self.domain,
-                            setter_name=self.setter_name,
-                            records=records,
-                        ).model_dump(),
-                    )
-                    logger.info(f"Unmanaged records saved to [bold purple]{path}[/].")
-                except Exception as e:
-                    logger.warning(f"Failed to save unmanaged records: {e}")
-        for subdomain, record in new_records.items():
-            cached_record = self.cached_records.get(subdomain, None)
+        self.fetch()
+        succeeded = True
+        ambiguous_keys = set(new_records) & self.ambiguous_record_keys
+        if ambiguous_keys:
+            formatted_keys = ", ".join(
+                f"{record_type} {subdomain}" for subdomain, record_type in sorted(ambiguous_keys)
+            )
+            raise ValueError(f"Multiple provider records match managed keys: {formatted_keys}")
+
+        unmanaged_keys = {
+            key
+            for key in self.cached_records
+            if key not in new_records and key[0] not in self.ignored_records
+        }
+        for key in sorted(unmanaged_keys):
+            logger.warning(f"([red]🔓 Unmanaged[/]) {self.cached_records[key]}")
+
+        for key, record in new_records.items():
+            cached_record = self.cached_records.get(key)
             if cached_record is None:
                 status = self.create_record(record)
             elif record != cached_record:
@@ -129,10 +119,16 @@ class DNSSetterBase:
                 status = RecordStatus.EXISTS
 
             if status in (RecordStatus.CREATED, RecordStatus.MODIFIED):
-                self.cached_records[subdomain] = record
-            logger.info(f"({status}) {record}")
+                self.cached_records[key] = record
+            elif status == RecordStatus.FAILED:
+                succeeded = False
+            message = f"({status}) {record}"
+            if status == RecordStatus.EXISTS:
+                logger.debug(message)
+            else:
+                logger.info(message)
 
-        # TODO: delete records which are not in new_records
+        return succeeded
 
     @abstractmethod
     def preprocess_record(self, record: Record) -> Record:

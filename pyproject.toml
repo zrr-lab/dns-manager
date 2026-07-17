@@ -1,25 +1,23 @@
 [project]
 name = "dns-manager"
-description = "Manage your DNS records with ease."
+description = "Keep DNS records synchronized with dynamic IP addresses."
 readme = "README.md"
-requires-python = ">=3.10"
-license = { file = "LICENSE" }
-authors = [{ name = "Zhan Rongrui", email = "2742392377@qq.com" }]
+requires-python = ">=3.12"
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+authors = [{ name = "Zhan Rongrui", email = "me@zrr.dev" }]
 classifiers = [
   "Environment :: Console",
-  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Typing :: Typed",
 ]
 dependencies = [
-  "cachetools>=5.3.2",
   "dns-lexicon>=3.17.0",
   "httpx>=0.26.0",
   "loguru>=0.7.2",
@@ -41,22 +39,16 @@ Repository = "https://github.com/zrr1999/dns-manager.git"
 dns-manager = "dns_manager.__main__:app"
 dnsm = "dns_manager.__main__:app"
 
-[project.optional-dependencies]
-all = ["dns-manager[watch]"]
-watch = ["watchfiles"]
-
 [dependency-groups]
 dev = [
-  "pyright>=1.1.407",
   "pytest>=9.0.1",
-  "pytest-asyncio>=1.3.0",
   "pytest-codspeed>=4.2.0",
   "pytest-cov>=7.0.0",
   "xdoctest>=1.3.0",
 ]
 
 [build-system]
-requires = ["pdm-backend", "pdm-pyfuture"]
+requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [tool.pdm.version]
@@ -71,7 +63,7 @@ source-includes = ["tests", "README.md"]
 [tool.ruff]
 line-length = 100
 src = ["dns_manager", "tests"]
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = [
@@ -95,3 +87,9 @@ required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "I002"]
+
+[tool.ty.src]
+include = ["dns_manager", "tests"]
+
+[tool.ty.rules]
+all = "error"

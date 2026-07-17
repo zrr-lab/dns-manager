@@ -1,15 +1,25 @@
 from __future__ import annotations
 
+from ipaddress import ip_address
+from typing import override
+
 import httpx
 
 from .base import IPGetterBase
 
 
 class PublicGetter(IPGetterBase):
-    def __init__(self, url: str = "4.ipw.cn", reg: str | None = None):
+    def __init__(self, url: str = "https://api.ipify.org", reg: str | None = None):
         self.url = url
         self.reg = reg
 
-    def get_ip(self):
-        assert self.reg is None, "Not implemented"
-        return httpx.get(self.url).text
+    @override
+    def get_ip(self) -> str:
+        if self.reg is not None:
+            raise NotImplementedError("Custom response patterns are not supported")
+
+        response = httpx.get(self.url, follow_redirects=True, timeout=10)
+        response.raise_for_status()
+        value = response.text.strip()
+        ip_address(value)
+        return value

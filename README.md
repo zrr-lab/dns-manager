@@ -15,67 +15,110 @@
 </p>
 
 
-一个可扩展的 DNS 管理工具。
+一个专注于 DDNS 的 DNS 记录同步工具。它从公网接口或本地网络设备获取动态 IP，
+并通过 [Lexicon](https://github.com/AnalogJ/lexicon) 将对应的 A/AAAA 记录同步到 DNS 提供商。
 
 ## 安装 [![Downloads](https://pepy.tech/badge/dns-manager)](https://pepy.tech/project/dns-manager)
 
 ### 使用 pip/pipx/uv 安装
 
-在此之前请确保安装 Python3.10 及以上版本，并安装了 pip。
+在此之前请确保使用 Python 3.12 或更高版本，并安装了 pip。
 ```shell
-pip install dns-manager[all]
+pip install dns-manager
 ```
 
-如果想要尝试 Nightly 版本，可尝试（需确保使用 Python3.12）
+如果想要尝试 Nightly 版本，可使用：
 ```shell
 pip install git+https://github.com/zrr1999/dns-manager@main
 ```
 
 在此之前请确保安装了 [pipx](https://github.com/pypa/pipx)/[uv](https://github.com/astral-sh/uv)。
 ```shell
-pipx install dns-manager[all]
-uv tool install dns-manager[all]
+pipx install dns-manager
+uv tool install dns-manager
 ```
 
 pipx/uv 会无感地为 dns-manager 创建一个虚拟环境，与其余环境隔离开，避免污染其他环境，
 因此相对于 pip，pipx/uv 是更推荐的安装方式。
 
 ## 使用说明
-### 基础示例
-首先创建一个配置文件，例如类似 `examples/simple.toml` 文件中的内容，如下：
+
+### DDNS 配置
+
+默认配置路径为 `~/.config/dns-manager/config.toml`。例如：
+
 ```toml
-[test]
+[home]
 domain = "mydomain.com"
 setter_name = "cloudflare"
 records = [
     [
-      "test",  # 也就是 test.mydomain.com 指向的路径
-      "baidu.com"  # 解析值，目前只支持 A 记录和 CNAME 记录，会根据此处的值自动判断
+      "home",
+      "public:https://api.ipify.org"
     ]
 ]
 ```
-然后执行以下命令：
-```shell
-dns-manager update examples/simple.toml
-# dnsm update examples/simple.toml
-```
-此时，你的解析记录就会增加一条 `test.mydomain.com` 的 CNAME 记录指向 `baidu.com` 。
 
-### 支持的 dns 提供商
+也支持同等结构的 `.json` 配置。未指定 `records_files` 时，会自动尝试加载与主配置同目录、同后缀的
+`records.toml` / `records.json`（文件不存在则跳过）。records 文件与主配置共用同一字段形状：
+
+```toml
+records = [
+    ["office", "public:https://api64.ipify.org"]
+]
+ignore = ["mail"]
+```
+
+`ignore` 里的主机名不会被同步，远端同名记录也不会被当成 unmanaged 告警。
+
+`public:` 后面是返回单个 IPv4 或 IPv6 地址的 HTTP 接口。dns-manager 会在每轮同步时
+重新获取地址，并根据响应选择 A 或 AAAA 记录。单个来源应保持稳定的地址族；双栈场景应分别配置
+固定返回 IPv4 与 IPv6 的来源。
+
+也可以使用：
+
+- `snmp:<interface>`：从网关接口读取地址
+- `default:v4` / `default:v6`：取本机默认出网地址
+- `local:v4` / `local:v6`：取本机主机名对应地址；可用 `local:v4:1` 选择第 N 个地址
+
+Lexicon 从环境变量读取提供商凭据。例如 Cloudflare 使用：
+
+```shell
+export LEXICON_CLOUDFLARE_AUTH_TOKEN=your-token
+```
+
+先执行一次同步以检查配置与凭据：
+
+```shell
+dnsm update
+# 或使用其他配置路径
+dnsm update ./examples/simple.toml
+```
+
+### Daemon 模式
+
+`daemon` 会在前台立即同步一次，随后按固定间隔继续同步：
+
+```shell
+dnsm daemon --interval 300
+# 或使用其他配置路径
+dnsm daemon ./examples/simple.toml --interval 300
+```
+
+daemon 不会 fork、脱离终端或写入 PID 文件，适合直接交给 systemd、launchd、容器或其他
+进程管理器托管。收到 SIGINT/SIGTERM 后，它会在当前同步结束后退出；再次发送信号可强制立即退出。
+配置在启动时读取，修改后需重启进程。
+
+### 支持的 DNS 提供商
 本项目实现了一个 [lexicon](https://github.com/dns-lexicon/dns-lexicon) 的适配 Setter，
 支持情况与其一致。
 
-### 定时执行
-你可以使用 [cronie](https://github.com/cronie-crond/cronie) 定时执行，例如
-```
-@reboot dnsm update ~/.config/dns-manager/config.toml
-@hourly dnsm update ~/.config/dns-manager/config.toml
-```
+### Cron 方式
 
-你可以通过下面的命令添加定时任务
-```shell
-(crontab -l 2>/dev/null; echo "@reboot dnsm update ~/.config/dns-manager/config.toml") | crontab
-(crontab -l 2>/dev/null; echo "@hourly dnsm update ~/.config/dns-manager/config.toml") | crontab
+如果不需要常驻进程，也可以用 cron 调用一次性同步：
+
+```
+@hourly dnsm update ~/.config/dns-manager/config.toml
 ```
 
 ## 如何贡献

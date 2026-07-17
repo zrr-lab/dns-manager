@@ -10,8 +10,13 @@ permissions:
   id-token: write
 
 jobs:
-  coverage:
+  test:
+    name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v6
       - name: Install just 📦
@@ -21,14 +26,22 @@ jobs:
       - name: Install Python 📦
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies 📦
         run: just install
-      - run: |
-          uv run dnsm update examples/simple.toml
+      - name: Run live DDNS integration test
+        if: matrix.python-version == '3.12'
+        run: |
+          if [ -z "$LEXICON_CLOUDFLARE_AUTH_TOKEN" ]; then
+            echo "Cloudflare token is unavailable; skipping live DDNS integration test."
+            exit 0
+          fi
+          uv run pytest -q tests/test_e2e.py
         env:
           LEXICON_CLOUDFLARE_AUTH_TOKEN: ${{ secrets.LEXICON_CLOUDFLARE_AUTH_TOKEN }}
+          RUN_LIVE_DNS_TESTS: "1"
       - name: Run tests and benchmarks ✅
+        if: matrix.python-version == '3.14'
         uses: CodSpeedHQ/action@v4
         env:
           LEXICON_CLOUDFLARE_AUTH_TOKEN: ${{ secrets.LEXICON_CLOUDFLARE_AUTH_TOKEN }}
@@ -36,6 +49,7 @@ jobs:
           mode: simulation
           run: just test
       - name: Upload coverage reports to Codecov 🚀
+        if: matrix.python-version == '3.14'
         uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

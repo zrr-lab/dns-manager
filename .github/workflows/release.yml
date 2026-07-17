@@ -25,11 +25,12 @@ jobs:
           verbosity: 2
       - name: Install the latest version of uv 📦
         uses: astral-sh/setup-uv@v6
+      - name: Install Python 📦
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Build distributions 📦
-        run: |
-          PYFUTURE_TARGET=py312 uv build --wheel
-          PYFUTURE_TARGET=py311 uv build --wheel
-          PYFUTURE_TARGET=py310 uv build --wheel
+        run: uv build --wheel
       - name: Publish package distributions to GitHub Releases 🚀
         if: steps.release.outputs.released == 'true'
         uses: python-semantic-release/publish-action@v10

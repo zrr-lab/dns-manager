@@ -1,27 +1,28 @@
 from __future__ import annotations
 
-import asyncio
 import os
+import signal
 from pathlib import Path
+from threading import Event
+from typing import Annotated
 
 import typer
 from loguru import logger
 from rich.console import Console
 from rich.highlighter import NullHighlighter
-from rich.live import Live
 from rich.logging import RichHandler
-from rich.progress import Progress, TextColumn
 from rich.style import Style
 
-from dns_manager.utils import create_setter_by_config, load_config_from_path
+from dns_manager.daemon import DEFAULT_INTERVAL, load_setters, run_cycle, run_forever
 
 app = typer.Typer()
+DEFAULT_CONFIG_PATH = Path("~/.config/dns-manager/config.toml")
 
 
 @app.callback()
 def main(
     log_level: str = "INFO",
-):
+) -> None:
     log_level = os.environ.get("LOG_LEVEL", log_level)
     handler = RichHandler(
         console=Console(style=Style()), highlighter=NullHighlighter(), markup=True
@@ -32,68 +33,35 @@ def main(
 
 @app.command()
 def update(
-    path: Path,
-    remove_unmanaged: bool = False,
-):
-    logger.info(f"Loading dns config from [bold purple]{path}[/].")
-    configs = load_config_from_path(path)
-    for config in configs:
-        setter_obj = create_setter_by_config(config)
-        setter_obj.update_dns(remove_unmanaged=remove_unmanaged)
+    path: Annotated[Path, typer.Argument()] = DEFAULT_CONFIG_PATH,
+) -> None:
+    setters = load_setters(path)
+    if not run_cycle(setters):
+        raise typer.Exit(code=1)
 
 
 @app.command()
-def watch(
-    path: Path,
-):
-    path = path.expanduser()
-    asyncio.run(watch_async(path))
+def daemon(
+    path: Annotated[Path, typer.Argument()] = DEFAULT_CONFIG_PATH,
+    interval: Annotated[
+        int,
+        typer.Option(min=1, help="Seconds between DDNS update cycles."),
+    ] = DEFAULT_INTERVAL,
+) -> None:
+    """Continuously synchronize DDNS records in the foreground."""
+    setters = load_setters(path)
+    stop_event = Event()
 
+    def request_stop(signum: int, _frame: object) -> None:
+        if stop_event.is_set():
+            logger.warning(f"Received signal {signum} again; forcing immediate exit.")
+            raise SystemExit(128 + signum)
+        logger.info(f"Received signal {signum}; stopping after the current update.")
+        stop_event.set()
 
-async def watch_async(path: Path):
-    import watchfiles
-
-    async def watch_config():
-        async for _ in watchfiles.awatch(path):
-            configs = load_config_from_path(path)
-
-            for config in configs:
-                setter_obj = create_setter_by_config(config)
-                setter_obj.update_dns()
-            progress.update(
-                countdown, completed=interval, description="Update Timer([bold]Reloading Config[/])"
-            )
-
-    async def update_dns():
-        while True:
-            for setter_obj in setter_objs:
-                setter_obj.update_dns()
-            progress.reset(countdown, description="Update Timer")
-
-            with Live(progress):
-                while not progress.finished:
-                    progress.update(countdown, advance=1)
-                    await asyncio.sleep(1)
-
-    logger.info(f"Loading dns config from [bold purple]{path}[/].")
-    # TODO: configurable interval
-    # interval = int(config.get("interval", 300))
-    interval = 300
-    progress = Progress(
-        TextColumn("{task.description}: [bold blue]{task.completed}s/{task.total}s[/]"),
-        transient=True,
-    )
-    countdown = progress.add_task("Update Timer", total=interval)
-
-    configs = load_config_from_path(path)
-    setter_objs = [create_setter_by_config(config) for config in configs]
-
-    update_task = asyncio.create_task(update_dns())
-    watch_task = asyncio.create_task(watch_config())
-    await asyncio.gather(
-        update_task,
-        watch_task,
-    )
+    signal.signal(signal.SIGINT, request_stop)
+    signal.signal(signal.SIGTERM, request_stop)
+    run_forever(setters, interval=interval, stop_event=stop_event)
 
 
 if __name__ == "__main__":

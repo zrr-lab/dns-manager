@@ -11,12 +11,8 @@ jobs:
     name: CodeStyle Check
     steps:
       - uses: actions/checkout@v6
-      - name: Install python 📦
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.12"
-      - name: Run pre-commit ✅
-        uses: pre-commit/action@v3.0.1
+      - name: Run prek ✅
+        uses: j178/prek-action@v2
 
   type-check:
     runs-on: ubuntu-latest
@@ -30,6 +26,6 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install dependencies 📦
-        run: uv sync --all-extras --dev
+        run: uv sync --locked --all-groups
       - name: Type Check 📦
-        run: uv run pyright .
+        run: uvx ty check .
